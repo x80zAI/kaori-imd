@@ -1,0 +1,48 @@
+KAORI IMD: Every transfer has a story.
+
+A transaction hash is precise. It is also easy to lose in a long list of addresses, blocks and events.
+
+Kaori IMD gives that record a place of its own: a full pixel manga archive for IMD transfers on Ethereum. Ink-blue streets, cherry-red accents, warm paper tones and an original archivist character bring a new visual identity to a practical tool.
+
+Meet Kaori, your pixel archivist.
+
+THE RECEIPT DESK
+
+Paste an Ethereum transaction hash, or choose a recent transaction containing IMD transfer events. Kaori reads the transaction, its receipt and the original block.
+
+Each record brings together:
+
+• Exact IMD amounts, with their original decimal precision.
+• The sender and recipient of each IMD transfer event.
+• The transaction sender and recipient, shown separately.
+• The block number and block timestamp.
+• Confirmations at the time of reading and the available finality status.
+• The execution gas fee in ETH.
+• A direct link to the original Ethereum record.
+
+Transactions with several IMD transfer events show each event separately. Their amounts remain separate, preserving the details of what the transaction actually emitted.
+
+YOUR OWN PAPER TRAIL
+
+An Ethereum record tells you what happened. A personal note helps you remember why you kept it.
+
+Save a receipt, add a note and find it again in your browser archive. You can keep up to 30 records, search your notes or hashes, and reopen a record to refresh its Ethereum reading.
+
+Download a readable text record or export its JSON data. A notes backup lets you move your saved hashes and notes to another browser. Restored records retrieve fresh Ethereum data when opened.
+
+The archive starts empty. Your notes stay in the browser you use. Each saved reading keeps its own retrieval time, so you can distinguish a stored record from a new reading.
+
+ONE CHARACTER. A CLEAR PURPOSE.
+
+Kaori's world is drawn in pixels. The transaction records come from Ethereum.
+
+The website reads events from the official Ethereum IMD token contract and connects each receipt back to its source. It displays pending, reverted and unavailable states as they are returned, while exact amounts are kept throughout the reading and export.
+
+Kaori IMD works without a wallet connection. Reading and keeping a receipt is a simple part of your own IMD workflow.
+
+Every transfer has a story. Keep yours readable.
+
+Open Kaori IMD: https://kaori-imd.vercel.app/
+Source code: https://github.com/x80zAI/kaori-imd
+
+Kaori IMD is an independent project focused on Ethereum IMD receipts.

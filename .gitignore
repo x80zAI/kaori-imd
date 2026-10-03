@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.vercel/
+.env*
+!.env.example
+artifacts/video/raw/
+artifacts/video/*.mp4
+artifacts/KAORI-IMD.zip
+verification/
+*.log

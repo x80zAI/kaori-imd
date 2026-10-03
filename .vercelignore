@@ -1,0 +1,7 @@
+node_modules
+artifacts
+verification
+tests
+scripts
+.git
+README.md
