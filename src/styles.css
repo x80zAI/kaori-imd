@@ -117,7 +117,7 @@ h1, h2, h3, p { margin: 0; }
 .input-help .icon { width: 13px; height: 13px; margin-top: 3px; }
 .status-message { margin-top: 1rem; padding: .75rem 1rem; border: 1px solid currentColor; font-size: .6875rem; line-height: 1.8; overflow-wrap: anywhere; }
 .status-message.error { color: #ff99a6; background: rgba(237, 64, 88, .08); }
-.status-message.success { color: #b2eac3; background: rgba(122, 190, 143, .08); }
+.status-message.success { color: #216341; background: #e5f1d6; }
 .receipt-empty { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; min-height: 240px; padding: 2rem; margin-top: 1.5rem; border: 2px dashed #666775; text-align: center; }
 .receipt-empty > .icon { width: 36px; height: 36px; color: var(--cherry); margin-bottom: .375rem; }
 .receipt-empty h3 { font-family: var(--pixel-font); font-size: 1.75rem; font-weight: 500; text-transform: uppercase; }
