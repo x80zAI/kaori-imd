@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import ReceiptInspector from './ReceiptInspector';
 import Archive from './Archive';
 import { useArchive } from './useArchive';
-import { CONTRACT } from './domain.mjs';
+import { KAORI_CONTRACT } from './domain.mjs';
+
+const projectContract = KAORI_CONTRACT.trim();
+const contractReady = /^0x[0-9a-fA-F]{40}$/.test(projectContract);
 
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,7 +18,8 @@ export default function App() {
   }, []);
   function openRecord(hash: string) { setRequestedHash(previous => ({ hash, sequence: (previous?.sequence ?? 0) + 1 })); document.getElementById('receipt')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }
   async function copyContract() {
-    try { await navigator.clipboard.writeText(CONTRACT); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+    if (!contractReady) { setCopied(false); return; }
+    try { await navigator.clipboard.writeText(projectContract); setCopied(true); setTimeout(() => setCopied(false), 2000); }
     catch { setCopied(false); }
   }
   return <>
@@ -30,7 +34,7 @@ export default function App() {
         ['03', '＋', 'Keep your chapter.', 'Add a personal note, save the receipt in your browser, and export a readable record or a notes backup.']
       ].map(([number, symbol, title, text]) => <article className="story-panel" key={number}><span className="story-number">{number}</span><span className="story-drawing" aria-hidden="true">{symbol}</span><div className="story-text"><h3>{title}</h3><p>{text}</p></div></article>)}</div></div></section>
       <Archive entries={archive.entries} warning={archive.warning} onRemove={archive.remove} onOpen={openRecord} onRestore={archive.restore} />
-      <section className="source-strip"><div className="container"><div><p className="eyebrow">THE ORIGINAL RECORD, ALWAYS WITHIN REACH</p><p className="source-contract">Official IMD on Ethereum<br /><a href={`https://etherscan.io/token/${CONTRACT}`} target="_blank" rel="noreferrer">{CONTRACT}</a></p></div><div className="receipt-actions"><button className="button secondary small" onClick={() => void copyContract()}>{copied ? 'Copied ✓' : 'Copy contract'}</button><a className="source-link" href="https://imd.fun/token/" target="_blank" rel="noreferrer">IMD source ↗</a><a className="source-link" href="https://imd.fun/docs/" target="_blank" rel="noreferrer">IMD network docs ↗</a></div></div></section>
+      <section className="source-strip"><div className="container"><div><p className="eyebrow">KAORI IMD CONTRACT</p><p className="source-contract" id="contract-status">{contractReady ? <a href={`https://etherscan.io/token/${projectContract}`} target="_blank" rel="noreferrer">{projectContract}</a> : <strong className="contract-pending">Coming Soon</strong>}</p></div><div className="receipt-actions"><button className="button secondary small contract-copy" onClick={() => void copyContract()} disabled={!contractReady} aria-describedby="contract-status">{copied ? 'Copied ✓' : 'Copy contract'}</button><a className="source-link" href="https://imd.fun/token/" target="_blank" rel="noreferrer">IMD data source ↗</a><a className="source-link" href="https://imd.fun/docs/" target="_blank" rel="noreferrer">IMD network docs ↗</a></div></div></section>
     </main><footer className="site-footer"><div className="footer-brand"><img src="/brand/kaori-avatar.png" width="48" height="48" alt="" loading="lazy" /><div><span className="brand-wordmark">KAORI IMD</span><p>Every transfer has a story.</p></div></div><div className="footer-nav"><a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer">Follow on X ↗</a><a href="https://github.com/x80zAI/kaori-imd" target="_blank" rel="noreferrer">Source code ↗</a><a href="#home">Back to the first page ↑</a><span>Independent IMD project · Ethereum mainnet</span></div></footer>
   </>;
 }

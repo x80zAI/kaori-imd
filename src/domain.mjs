@@ -1,4 +1,7 @@
 export const CONTRACT = '0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7';
+// Kaori's own contract stays empty until David supplies its address.
+// CONTRACT above identifies the external IMD receipt data source.
+export const KAORI_CONTRACT = '';
 export const HASH = /^0x[0-9a-fA-F]{64}$/;
 export const STORAGE_KEY = 'kaori-imd.archive.v1';
 export const MAX_RECORDS = 30;

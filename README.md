@@ -15,12 +15,18 @@ The archive holds up to 30 records. Browser storage is personal to that browser 
 
 This is an independent IMD project. Kaori does not connect wallets or submit blockchain transactions. A exported record is a timestamped public RPC reading, not a signed certificate of ownership. Confirmations change after the recorded reading. Gas fee is the execution gas cost; possible blob gas fees are outside that field.
 
+## Kaori contract
+
+Kaori's own contract address is not configured. The website displays **Coming Soon**, and copying the contract is disabled while the address is empty. David will supply the address; set the single `KAORI_CONTRACT` value in `src/domain.mjs` when it is available. A valid Ethereum address will then appear with its matching copy button and Etherscan link.
+
+The official IMD contract used by the receipt desk is an external data source, separate from Kaori's future contract. Keeping Kaori's contract empty does not replace or invent the source of existing IMD transaction records.
+
 ## Public links
 
-- Website: https://kaori-imd.vercel.app/
+- Website: https://kaorimd.site/
+- Vercel address: https://kaori-imd.vercel.app/
 - Source: https://github.com/x80zAI/kaori-imd
-- Official IMD token: https://imd.fun/token/
-- Ethereum token: `0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7`
+- IMD receipt data source (external token): https://imd.fun/token/
 - Data details and limits: [docs/SOURCES.md](docs/SOURCES.md)
 
 ## Run locally

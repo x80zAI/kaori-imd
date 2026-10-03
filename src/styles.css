@@ -232,6 +232,8 @@ h1, h2, h3, p { margin: 0; }
 .source-contract { display: block; min-width: 0; font-size: .6875rem; line-height: 1.9; }
 .source-contract a { display: block; overflow-wrap: anywhere; }
 .source-contract strong { font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.source-contract .contract-pending { font-family: var(--pixel-font); font-size: 1.5rem; line-height: 1.25; color: var(--cherry-dark); letter-spacing: 0; text-transform: none; }
+.contract-copy:disabled { cursor: not-allowed; transform: none; }
 .source-contract code { font-family: inherit; color: #555969; overflow-wrap: anywhere; }
 .source-link { display: inline-flex; align-items: center; gap: .375rem; font-size: .6875rem; font-weight: 600; line-height: 1.7; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
 .source-link .icon { width: 13px; height: 13px; }
