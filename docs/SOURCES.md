@@ -48,6 +48,20 @@ Confirmation is not inferred from a returned hash. It requires two confirmations
 
 The standard vault methods do not enforce a minimum output. The interface therefore labels previews as quotes that may change. There is no claimed fixed APR, future gain, token price, proprietary Kaori staking pool or Kaori custody. POOL4's official documentation describes the protocol as unaudited. Owner powers are presented according to the current verified `owner()` reading; a zero owner means ownership has been renounced. Development verification uses read-only calls, public historical transactions and isolated fixtures, without submitting funds.
 
+## Public IMD network readings
+
+The network desk reads the official [Identity.md API](https://imd.fun/docs/) at `https://api.imd.fun`. Its dedicated `GET /api/network` endpoint accepts an allowlisted view and validated search, cursor or record ID parameters. It never forwards an arbitrary destination, user credential or wallet signature. Public strings are rendered as text; no returned HTML is executed.
+
+- `overview` reads `/swarm`: the network's timestamp, service reachability, published counts, seat records and recent events. These records come from one upstream snapshot. Historical seat records are not equivalent to currently enrolled or online agents. A seat's working flag is not an online-presence claim.
+- `jobs` reads a bounded page of `/jobs`, with optional objective/ID search and creation-time pagination. `job` reads a specific public record. A job state is the protocol's reported state, not Kaori's independent proof that its work is correct.
+- `oracles` reads a bounded page of `/oracle/requests`; `oracle` reads a specific request with its public result fields. The UI distinguishes the reported answer, signature availability and any failure. It does not label a signature as independently verified or an answer as guaranteed correct.
+
+`retrievedAt` identifies when Kaori obtained a response; the overview also preserves the network's own `observedAt`. A list's count is the number of returned records, not a network-wide total. An empty search result applies only to that query/page. The watchlist stores references, notes and the save time; opening a reference obtains a new observation. A separately exported reading preserves the data and retrieval time.
+
+Unavailable, malformed or oversized upstream data produces an unavailable state. The server limits response size and duration, caches bounded successful readings briefly and coalesces duplicate requests. No scheduled work, paid request, token purchase, reward distribution or treasury payment is triggered by this integration.
+
+SI-MD supplied functional inspiration for viewing public IMD work. Its contract address, payment treasury, private state and generated content are not Kaori services or Kaori assets.
+
 ## Storage and availability
 
 The server keeps a bounded, 15-second memory cache and shares duplicate in-flight requests. It stores no requested hashes or transaction data on disk. Public RPC services and hosting platforms may keep their own operational logs according to their policies. Recent activity may change between refreshes. RPC failure produces an unavailable response, never a fabricated zero, receipt or confirmation.
