@@ -1,0 +1,322 @@
+/* Tool surfaces share the workspace palette without changing the data or wallet flows. */
+.kaori-workspace .console-section,
+.kaori-workspace .approval-section,
+.kaori-workspace .staking-section,
+.kaori-workspace .network-section,
+.kaori-workspace .archive-section {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff1d7;
+  min-width: 0;
+}
+.kaori-workspace .console-section::before { display: none; }
+.kaori-workspace .workspace-panel > section > .container { width: 100%; max-width: none; margin: 0; }
+.kaori-workspace .workspace-panel[hidden] { display: none !important; }
+
+.kaori-workspace .tool-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 33%);
+  align-items: center;
+  min-height: 150px;
+  margin-bottom: 20px;
+  border: 1px solid #333c53;
+  background: #131928;
+  overflow: hidden;
+}
+.kaori-workspace .tool-heading-copy { position: relative; z-index: 1; min-width: 0; padding: 22px 26px; }
+.kaori-workspace .tool-heading h2 { font: 600 clamp(1.9rem, 3.5vw, 2.75rem)/1.08 var(--pixel-font); letter-spacing: -.035em; text-wrap: balance; }
+.kaori-workspace .tool-heading h2 > span { color: #ed4058; }
+.kaori-workspace .tool-heading-copy > p { max-width: 670px; margin-top: 10px; color: #a2abc2; font-size: .8125rem; line-height: 1.75; }
+.kaori-workspace .tool-heading-actions { margin-top: 16px; }
+.kaori-workspace .tool-heading-art { position: relative; align-self: stretch; min-width: 0; min-height: 148px; overflow: hidden; }
+.kaori-workspace .tool-heading-art > img { position: absolute; width: 100%; height: 100%; object-fit: cover; object-position: 70% 30%; image-rendering: pixelated; }
+.kaori-workspace .tool-heading-art::before { content: ''; position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg, #131928 0%, transparent 22%, #10142120 100%); }
+.kaori-workspace .tool-comic-bubble { position: absolute; z-index: 2; top: 36px; left: 10px; width: 112px; padding: 12px 10px 15px; background: #fff1d7; color: #101421; font: 400 1.18rem/1.05 'Bangers', var(--pixel-font); letter-spacing: .025em; text-align: center; text-transform: uppercase; clip-path: polygon(7% 0, 93% 0, 93% 7%, 100% 7%, 100% 85%, 92% 85%, 92% 100%, 79% 88%, 7% 88%, 7% 81%, 0 81%, 0 7%, 7% 7%); }
+.kaori-workspace .tool-art-pixels { position: absolute; z-index: 2; right: 13px; top: 13px; width: 4px; height: 4px; background: #ed4058; box-shadow: -9px 7px #ed4058, 4px 18px #ed4058, -20px -5px #ed4058; animation: tool-petal-drift 7s ease-in-out infinite alternate; }
+@keyframes tool-petal-drift { from { transform: translateY(0); opacity: .6; } to { transform: translateY(5px); opacity: 1; } }
+
+.kaori-workspace .workspace-panel .button { min-height: 42px; padding: .72rem 1rem; border: 1px solid #48546f; background: #1c2538; color: #fff1d7; box-shadow: none; font-size: .6875rem; text-transform: none; letter-spacing: .01em; transition: border-color .16s, background .16s; }
+.kaori-workspace .workspace-panel .button:hover:not(:disabled) { transform: none; background: #27324a; border-color: #ed4058; box-shadow: none; }
+.kaori-workspace .workspace-panel .button:active:not(:disabled) { transform: none; background: #303b53; box-shadow: none; }
+.kaori-workspace .workspace-panel .button.primary { background: #ed4058; border-color: #ed4058; color: #101421; font-weight: 600; }
+.kaori-workspace .workspace-panel .button.primary:hover:not(:disabled) { background: #ff7187; border-color: #ff7187; }
+.kaori-workspace .workspace-panel .button.small { min-height: 36px; padding: .55rem .75rem; }
+.kaori-workspace .workspace-panel button:disabled { cursor: not-allowed; opacity: .6; }
+.kaori-workspace .workspace-panel :is(button, a, input, textarea):focus-visible { outline: 2px solid #fff1d7; outline-offset: 3px; }
+.kaori-workspace .workspace-panel .source-link { max-width: 100%; white-space: normal; overflow-wrap: anywhere; color: #ff8c9e; }
+.kaori-workspace .workspace-panel .source-link:hover { color: #fff1d7; }
+.kaori-workspace .workspace-panel .input-help,
+.kaori-workspace .workspace-panel .data-label,
+.kaori-workspace .workspace-panel .section-copy,
+.kaori-workspace .workspace-panel .recent-meta,
+.kaori-workspace .workspace-panel .archive-meta { color: #a2abc2; }
+.kaori-workspace .workspace-panel .input-help { font-size: .6875rem; line-height: 1.75; }
+.kaori-workspace .workspace-panel .field-label { margin-bottom: .6rem; letter-spacing: .025em; text-transform: none; color: #fff1d7; }
+.kaori-workspace .workspace-panel .chapter-tag { color: #a2abc2; }
+.kaori-workspace .workspace-panel .chapter-tag::before { background: #ed4058; }
+.kaori-workspace .workspace-panel .status-message { border-color: #48546f; background: #1c2538; color: #fff1d7; }
+.kaori-workspace .workspace-panel .status-message.error,
+.kaori-workspace .workspace-panel .network-error { color: #ffafba; background: #311e2d; border-color: #b95166; }
+.kaori-workspace .workspace-panel .status-message.success { color: #aeebc6; background: #183029; border-color: #457b63; }
+.kaori-workspace .workspace-panel :is(.hash-input, .approval-input, .note-input, .archive-search),
+.kaori-workspace .network-filter input:not([type=checkbox]),
+.kaori-workspace .network-search input,
+.kaori-workspace .network-save textarea { border: 1px solid #48546f; background: #101421; color: #fff1d7; font-size: .75rem; line-height: 1.6; }
+.kaori-workspace .workspace-panel input::placeholder,
+.kaori-workspace .workspace-panel textarea::placeholder { color: #919bb4; opacity: 1; }
+.kaori-workspace .workspace-panel input:focus,
+.kaori-workspace .workspace-panel textarea:focus { border-color: #ff7187; }
+
+.kaori-workspace .inspector-layout { grid-template-columns: minmax(0, 1fr) minmax(240px, 29%); gap: 18px; align-items: stretch; }
+.kaori-workspace .query-form,
+.kaori-workspace .recent-panel,
+.kaori-workspace .receipt-result,
+.kaori-workspace .approval-form,
+.kaori-workspace .approval-result,
+.kaori-workspace .approval-guide,
+.kaori-workspace .staking-card,
+.kaori-workspace .staking-position,
+.kaori-workspace .staking-transaction,
+.kaori-workspace .staking-guide,
+.kaori-workspace .network-overview,
+.kaori-workspace .network-browser,
+.kaori-workspace .network-detail,
+.kaori-workspace .archive-card { border: 1px solid #333c53; color: #fff1d7; background: #191f31; box-shadow: none; }
+.kaori-workspace .query-form { padding: 20px; border-top: 2px solid #ed4058; }
+.kaori-workspace .query-form > .field-label { font-family: var(--pixel-font); font-size: 1.1rem; margin-bottom: 16px; }
+.kaori-workspace .hash-input { min-height: 46px; height: auto; }
+.kaori-workspace .input-row { align-items: stretch; }
+.kaori-workspace .input-row .button { min-height: 46px; }
+.kaori-workspace .receipt-empty { min-height: 320px; margin-top: 16px; padding: 30px 20px; border: 1px solid #333c53; background-color: #131928; background-image: radial-gradient(#333c5366 .65px, transparent .65px); background-size: 7px 7px; }
+.kaori-workspace .receipt-empty .story-drawing,
+.kaori-workspace .archive-empty .story-drawing { color: #ed4058; text-shadow: 2px 2px #101421; }
+.kaori-workspace .receipt-empty h3 { font-size: 1.5rem; text-transform: none; }
+.kaori-workspace .receipt-empty p { color: #a2abc2; max-width: 420px; }
+.kaori-workspace .receipt-empty .chapter-tag { margin-top: 18px; font-size: .625rem; }
+.kaori-workspace .recent-panel { border-top: 2px solid #ed4058; }
+.kaori-workspace .recent-head { justify-content: flex-start; gap: 10px; border-bottom: 1px solid #333c53; padding: 18px 16px; }
+.kaori-workspace .recent-head h3 { font-size: 1.25rem; text-transform: none; }
+.kaori-workspace .recent-list { display: block; }
+.kaori-workspace .recent-item { color: #fff1d7; border-color: #333c53; padding: 14px 16px; }
+.kaori-workspace .recent-item + .recent-item { border-left: 0; }
+.kaori-workspace .recent-item:hover:not(:disabled) { background: #232d43; }
+.kaori-workspace .recent-panel > p { color: #a2abc2; padding: 14px 16px; }
+.kaori-workspace .receipt-result { margin-top: 16px; }
+.kaori-workspace .receipt-topline { padding: 18px 20px; border-bottom: 1px solid #333c53; }
+.kaori-workspace .receipt-title { font-size: 1.5rem; text-transform: none; }
+.kaori-workspace .receipt-grid { padding: 20px; gap: 18px; }
+.kaori-workspace .data-value { color: #fff1d7; line-height: 1.8; }
+.kaori-workspace .transfer-list { padding: 0 20px 16px; }
+.kaori-workspace .transfer-row { border-color: #333c53; }
+.kaori-workspace .transfer-row .section-index { width: 26px; height: 26px; border: 1px solid #48546f; font-size: 1rem; }
+.kaori-workspace .transfer-amount { color: #ff8c9e; }
+.kaori-workspace .receipt-result > .input-help { padding: 0 20px 16px; }
+.kaori-workspace .note-field { padding: 16px 20px; border-top: 1px solid #333c53; }
+.kaori-workspace .receipt-actions { padding: 0 20px 20px; gap: 8px; }
+.kaori-workspace .status-badge.success { color: #aeebc6; background: #183029; }
+.kaori-workspace .status-badge.pending { color: #ffe3a1; background: #362d1d; }
+.kaori-workspace .status-badge.reverted { color: #ffafba; background: #311e2d; }
+
+.kaori-workspace .approval-layout,
+.kaori-workspace .staking-layout { grid-template-columns: minmax(0, 1.55fr) minmax(260px, 1fr); gap: 18px; }
+.kaori-workspace .approval-form { padding: 20px; gap: 20px; border-top: 2px solid #ed4058; }
+.kaori-workspace .approval-guide,
+.kaori-workspace .staking-guide { padding: 20px; }
+.kaori-workspace .approval-guide h3,
+.kaori-workspace .staking-guide h3 { font-size: 1.9rem; margin-block: 12px 16px; }
+.kaori-workspace .approval-guide p,
+.kaori-workspace .approval-guide li,
+.kaori-workspace .staking-guide li { font-size: .75rem; line-height: 1.85; }
+.kaori-workspace .approval-guide ul { margin-block: 16px; }
+.kaori-workspace .approval-guide-note { border-color: #333c53; color: #a2abc2; }
+.kaori-workspace .approval-empty { margin-top: 16px; padding: 20px; border: 1px solid #333c53; background: #131928; }
+.kaori-workspace .approval-seal { background: #ed4058; color: #101421; border: 0; box-shadow: 3px 3px #3e2838; width: 40px; height: 40px; }
+.kaori-workspace .approval-empty h3,
+.kaori-workspace .approval-result h3 { font-size: 1.5rem; }
+.kaori-workspace .approval-empty p { color: #a2abc2; font-size: .75rem; }
+.kaori-workspace .approval-result { margin-top: 16px; }
+.kaori-workspace .approval-result-head { padding: 20px; border-bottom: 1px solid #333c53; }
+.kaori-workspace .approval-maximum .approval-result-head { background: #311e2d; }
+.kaori-workspace .approval-result-head > p { color: #a2abc2; font-size: .75rem; }
+.kaori-workspace .approval-amount { padding: 18px 20px 0; }
+.kaori-workspace .approval-amount p { color: #ff8c9e; }
+.kaori-workspace .approval-result-footer { border-color: #333c53; padding: 0 20px 20px; }
+.kaori-workspace .approval-result-footer .receipt-actions { padding: 12px 0 0; }
+
+.kaori-workspace .staking-card { border-top: 2px solid #ed4058; }
+.kaori-workspace .staking-card-head { color: #fff1d7; background: #20283c; padding: 16px 20px; border-bottom: 1px solid #333c53; }
+.kaori-workspace .staking-card-head .eyebrow { font-family: var(--pixel-font); font-size: 1.2rem; }
+.kaori-workspace .staking-wallet-bar { border-color: #333c53; padding: 16px 20px; }
+.kaori-workspace .staking-wallet-choices,
+.kaori-workspace .staking-network-prompt { padding: 16px 20px; background: #101421; border-color: #333c53; }
+.kaori-workspace .staking-tabs { padding: 18px 20px 0; gap: 8px; }
+.kaori-workspace .staking-tabs button { border: 1px solid #48546f; color: #a2abc2; padding: 12px 8px; background: #101421; font-size: .75rem; }
+.kaori-workspace .staking-tabs button[aria-pressed='true'] { background: #3a2436; border-color: #ed4058; color: #fff1d7; box-shadow: inset 0 -2px #ed4058; }
+.kaori-workspace .staking-form { padding: 20px; }
+.kaori-workspace .staking-amount-row { border: 1px solid #48546f; background: #101421; }
+.kaori-workspace .staking-amount-row .approval-input { border: 0; font-size: 1rem; min-height: 54px; }
+.kaori-workspace .staking-amount-row > span { font-size: 1.25rem; padding-right: 14px; }
+.kaori-workspace .staking-balance-line { color: #a2abc2; }
+.kaori-workspace .staking-quote { padding: 15px; background: #101421; border: 1px solid #333c53; margin-block: 18px; }
+.kaori-workspace .staking-quote > p { font-size: .75rem; }
+.kaori-workspace .staking-quote strong { color: #ff8c9e; font-size: 1.4rem; }
+.kaori-workspace .staking-wallet-review { border-color: #333c53; }
+.kaori-workspace .staking-position,
+.kaori-workspace .staking-transaction { padding: 20px; margin-top: 16px; }
+.kaori-workspace .staking-position h3,
+.kaori-workspace .staking-transaction h3 { font-size: 1.5rem; }
+.kaori-workspace .staking-stats { gap: 18px; }
+.kaori-workspace .staking-stats dd { font-size: 1.35rem; }
+.kaori-workspace .staking-transaction { border-left: 3px solid #ed4058; }
+.kaori-workspace .staking-confirmed { background: #183029; border-left-color: #74c497; }
+.kaori-workspace .staking-share-art { min-height: 88px; margin-bottom: 20px; background-image: radial-gradient(#48546f .65px, transparent .65px); background-size: 7px 7px; }
+.kaori-workspace .staking-share-art > span:first-child { font-size: 2rem; padding: 8px 18px; border-width: 2px; box-shadow: 4px 4px #ed4058; background: #101421; color: #fff1d7; }
+.kaori-workspace .staking-share-art > span:last-child { right: 8%; font-size: 1.1rem; }
+.kaori-workspace .staking-guide li + li { margin-top: 12px; }
+.kaori-workspace .staking-vault-reading { margin-top: 18px; padding-top: 18px; border-color: #333c53; }
+.kaori-workspace .staking-protocol-note { padding: 12px; margin-top: 18px; background: #311e2d; color: #ffcad2; font-size: .6875rem; }
+.kaori-workspace .staking-source-links { margin-top: 16px; color: #ff8c9e; }
+
+.kaori-workspace .network-overview { padding: 18px 20px; margin-top: 0; border-top: 2px solid #ed4058; }
+.kaori-workspace .network-overview-top { flex-wrap: wrap; gap: 12px; }
+.kaori-workspace .network-metrics { border-color: #333c53; border-width: 1px; margin-top: 14px; }
+.kaori-workspace .network-metric { padding: 16px; border-color: #333c53; }
+.kaori-workspace .network-metric strong { margin-top: 7px; font-size: clamp(1.8rem, 3vw, 2.7rem); color: #ff7187; }
+.kaori-workspace .network-metric span { color: #a2abc2; }
+.kaori-workspace .network-summary { margin-top: 12px; font-size: .6875rem; }
+.kaori-workspace .network-reading-status { margin-top: 10px; color: #a2abc2; }
+.kaori-workspace .network-workspace { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+.kaori-workspace .network-tabs { background: #101421; border-color: #333c53; border-width: 1px; gap: 0; }
+.kaori-workspace .network-tabs button { min-height: 44px; background: #161d2e; color: #a2abc2; padding: 12px 9px; font-size: .6875rem; }
+.kaori-workspace .network-tabs button[aria-pressed=true] { color: #fff1d7; background: #3a2436; box-shadow: inset 0 -2px #ed4058; }
+.kaori-workspace .network-tabs button:focus-visible { outline-color: #fff1d7; outline-offset: -4px; }
+.kaori-workspace .network-tab-content { padding: 18px; min-height: 260px; }
+.kaori-workspace .network-filter input:not([type=checkbox]),
+.kaori-workspace .network-search input,
+.kaori-workspace .network-save textarea { padding: 11px 12px; }
+.kaori-workspace .network-checkbox input { accent-color: #ed4058; }
+.kaori-workspace .network-row { padding-block: 14px; border-color: #333c53; flex-wrap: nowrap; }
+.kaori-workspace .network-row > div:first-child { flex-basis: auto; min-width: 0; }
+.kaori-workspace .network-row-title { font-size: .75rem; }
+.kaori-workspace .network-state { color: #e2dff2; background: #242d43; border-color: #48546f; }
+.kaori-workspace .network-pagination { border-color: #333c53; border-width: 1px; padding-top: 14px; }
+.kaori-workspace .network-detail { padding: 20px; border-top: 2px solid #ed4058; }
+.kaori-workspace .network-close { color: #fff1d7; border: 1px solid #48546f; background: #101421; }
+.kaori-workspace .network-detail > h3 { font-size: 1.75rem; margin-top: 14px; }
+.kaori-workspace .network-detail-empty { padding-top: 18px; font-size: .75rem; gap: 14px; color: #a2abc2; }
+.kaori-workspace .network-detail-empty > span { font-size: 3rem; color: #ed4058; }
+.kaori-workspace .network-objective { font-size: .8125rem; }
+.kaori-workspace .network-fields { gap: 12px; margin-block: 18px; }
+.kaori-workspace .network-fields > div { border-color: #333c53; padding-bottom: 12px; }
+.kaori-workspace .network-result { border-color: #333c53; background: #101421; color: #d9deed; padding: 14px; }
+.kaori-workspace .network-save { border-top: 1px solid #333c53; padding-top: 18px; }
+.kaori-workspace .network-save .receipt-actions { padding: 0; }
+.kaori-workspace .network-save-message { border-color: #48546f; background: #20283c; }
+.kaori-workspace .network-footnote { margin-top: 18px; max-width: none; color: #a2abc2; padding-top: 16px; border-top: 1px solid #333c53; }
+.kaori-workspace .network-footnote p + p { margin-top: 5px; }
+.kaori-workspace .network-empty { padding-block: 24px; color: #a2abc2; }
+.kaori-workspace .network-empty h3,
+.kaori-workspace .network-saved-head h3 { font-size: 1.5rem; color: #fff1d7; }
+
+.kaori-workspace .archive-tools { flex-direction: row; align-items: center; width: auto; gap: 10px; }
+.kaori-workspace .archive-tools .chapter-tag { font-size: .625rem; margin: 0; }
+.kaori-workspace .archive-tools .chapter-tag::before { display: none; }
+.kaori-workspace .archive-section > .container > .section-copy { font-size: .75rem; max-width: 860px; margin: 0 0 20px; }
+.kaori-workspace .archive-empty { padding: 28px 22px; gap: 18px; border: 1px solid #333c53; background: #191f31; }
+.kaori-workspace .archive-empty h3 { font-size: 1.5rem; text-transform: none; }
+.kaori-workspace .archive-empty p { color: #a2abc2; }
+.kaori-workspace .archive-empty > .button { margin-left: 0; max-width: 100%; }
+.kaori-workspace .archive-list { gap: 16px; }
+.kaori-workspace .archive-card { padding: 20px; }
+.kaori-workspace .archive-card-top { border-color: #333c53; padding-bottom: 14px; }
+.kaori-workspace .archive-card-actions { gap: 12px; margin-top: 18px; }
+.kaori-workspace .archive-card-actions .button { color: #fff1d7; background: #1c2538; border: 1px solid #48546f; }
+.kaori-workspace .archive-warning { color: #ffcad2; margin: 0 0 18px; padding: 12px; border-left: 3px solid #ed4058; background: #311e2d; }
+.kaori-workspace .archive-search { margin-top: 8px; }
+
+@media (max-width: 1100px) {
+  .kaori-workspace .tool-heading { grid-template-columns: minmax(0, 1fr) 220px; }
+  .kaori-workspace .tool-heading-copy { padding: 20px; }
+  .kaori-workspace .approval-layout,
+  .kaori-workspace .staking-layout { grid-template-columns: minmax(0, 1fr); }
+  .kaori-workspace .network-workspace { grid-template-columns: minmax(0, 1fr); }
+  .kaori-workspace .network-row { flex-wrap: nowrap; }
+  .kaori-workspace .network-row > div:first-child { flex-basis: auto; }
+  .kaori-workspace .network-row-actions { flex-direction: row; }
+}
+@media (max-width: 980px) {
+  .kaori-workspace .inspector-layout { grid-template-columns: minmax(0, 1fr); }
+  .kaori-workspace .recent-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kaori-workspace .recent-item:nth-child(even) { border-left: 1px solid #333c53; }
+  .kaori-workspace .tool-heading { grid-template-columns: minmax(0, 1fr) 190px; }
+  .kaori-workspace .tool-comic-bubble { left: 3px; width: 97px; font-size: 1.05rem; }
+  .kaori-workspace .archive-empty { flex-wrap: wrap; }
+}
+@media (max-width: 640px) {
+  .kaori-workspace .tool-heading { min-height: 0; grid-template-columns: minmax(0, 1fr); gap: 0; margin-bottom: 16px; }
+  .kaori-workspace .tool-heading-copy { padding: 18px; }
+  .kaori-workspace .tool-heading h2 { font-size: 2rem; }
+  .kaori-workspace .tool-heading-copy > p { font-size: .75rem; }
+  .kaori-workspace .tool-heading-art { min-height: 102px; border-top: 1px solid #333c53; }
+  .kaori-workspace .tool-heading-art > img { object-position: 75% 29%; }
+  .kaori-workspace .tool-heading-art::before { background: linear-gradient(90deg, #131928aa, transparent 55%); }
+  .kaori-workspace .tool-comic-bubble { top: 15px; left: 18px; width: 115px; font-size: 1.15rem; }
+  .kaori-workspace .input-row { flex-direction: column; gap: 10px; }
+  .kaori-workspace .input-row .button { align-self: stretch; }
+  .kaori-workspace .query-form,
+  .kaori-workspace .approval-form,
+  .kaori-workspace .approval-guide,
+  .kaori-workspace .staking-guide,
+  .kaori-workspace .staking-form,
+  .kaori-workspace .staking-position,
+  .kaori-workspace .staking-transaction,
+  .kaori-workspace .network-detail,
+  .kaori-workspace .network-overview,
+  .kaori-workspace .archive-card { padding: 16px; }
+  .kaori-workspace .receipt-empty { min-height: 240px; padding: 24px 16px; }
+  .kaori-workspace .receipt-topline,
+  .kaori-workspace .receipt-grid,
+  .kaori-workspace .note-field,
+  .kaori-workspace .approval-result-head { padding: 16px; }
+  .kaori-workspace .receipt-actions { padding: 0 16px 16px; }
+  .kaori-workspace .transfer-list { padding: 0 16px 16px; }
+  .kaori-workspace .receipt-result > .input-help { padding: 0 16px 16px; }
+  .kaori-workspace .approval-amount { padding: 16px 16px 0; }
+  .kaori-workspace .approval-result-footer { padding: 0 16px 16px; }
+  .kaori-workspace .staking-card-head,
+  .kaori-workspace .staking-wallet-bar,
+  .kaori-workspace .staking-wallet-choices,
+  .kaori-workspace .staking-network-prompt { padding: 14px 16px; }
+  .kaori-workspace .staking-tabs { padding: 16px 16px 0; }
+  .kaori-workspace .staking-stats { grid-template-columns: minmax(0, 1fr); }
+  .kaori-workspace .network-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kaori-workspace .network-metric { padding: 14px 10px; }
+  .kaori-workspace .network-metric:nth-child(2) { border-right: 0; }
+  .kaori-workspace .network-metric:nth-child(3) { padding-left: 0; }
+  .kaori-workspace .network-metric:nth-child(n+3) { border-top: 1px solid #333c53; }
+  .kaori-workspace .network-tab-content { padding: 16px; }
+  .kaori-workspace .network-tabs button { flex: 1 1 50%; border-bottom: 1px solid #333c53; }
+  .kaori-workspace .archive-list { grid-template-columns: minmax(0, 1fr); }
+  .kaori-workspace .archive-empty { padding: 22px 16px; }
+}
+@media (max-width: 420px) {
+  .kaori-workspace .receipt-grid { grid-template-columns: minmax(0, 1fr); }
+  .kaori-workspace .recent-list { display: block; }
+  .kaori-workspace .recent-item:nth-child(even) { border-left: 0; }
+  .kaori-workspace .approval-empty { align-items: flex-start; gap: 12px; padding: 16px; }
+  .kaori-workspace .approval-seal { width: 30px; height: 30px; font-size: 1.5rem; }
+  .kaori-workspace .network-row { flex-wrap: wrap; }
+  .kaori-workspace .network-row > div:first-child { flex-basis: 100%; }
+  .kaori-workspace .network-search > div { flex-wrap: wrap; }
+  .kaori-workspace .network-search input { flex-basis: 100%; }
+  .kaori-workspace .archive-tools { gap: 8px; }
+  .kaori-workspace .archive-tools .chapter-tag { flex-basis: 100%; }
+  .kaori-workspace .archive-empty > div { flex-basis: calc(100% - 70px); }
+  .kaori-workspace .archive-card-top { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .kaori-workspace .staking-position-head { align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kaori-workspace .tool-art-pixels { animation: none; }
+}

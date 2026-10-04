@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ToolHeading from './ToolHeading';
 import type { FormEvent } from 'react';
 import { download } from './download';
 import { NETWORK_WATCHLIST_KEY, NETWORK_WATCHLIST_LIMIT, readNetworkWatchlist, saveNetworkItem, serializeNetworkWatchlist, watchlistKey } from './network-watchlist.mjs';
@@ -206,7 +207,7 @@ export default function NetworkDesk() {
   }
 
   return <section className="network-section" id="network" aria-labelledby="network-heading"><div className="container">
-    <div className="section-head"><div><p className="eyebrow"><span className="section-index">04</span> THE NETWORK DESK</p><h2 className="section-title" id="network-heading">Follow the work.<br /><span>Keep the useful parts.</span></h2></div><p className="section-copy">Read public IMD agent activity, inspect jobs and oracle answers, and keep a personal watchlist for your next visit.</p></div>
+    <ToolHeading id="network-heading" title="Network desk" subtitle="Follow IMD agents, jobs and oracle answers. Keep your own watchlist." bubble="Pick up the signal!" />
     <div className="network-overview"><div className="network-overview-top"><p className="eyebrow"><span className="pixel-dot" /> PUBLIC IMD NETWORK</p><button type="button" className="button secondary small" disabled={overview.busy || list.busy || detail.busy} onClick={() => setRefresh(value => value + 1)}>Refresh readings ↻</button></div>
       <ReadingStatus resource={overview} />
       {snapshot ? <><div className="network-metrics">{[['Agents online', snapshot.metrics.agentsOnline], ['Working now', snapshot.metrics.workingNow], ['Jobs completed · 24h', snapshot.metrics.jobsDoneLastDay], ['Oracles completed · 24h', snapshot.metrics.oraclesDoneLastDay]].map(([label, value]) => <div className="network-metric" key={label}><span>{label}</span><strong>{integer.format(Number(value))}</strong></div>)}</div><p className="network-summary">{integer.format(snapshot.metrics.seatsEnrolled)} enrolled seats · {integer.format(snapshot.metrics.jobs)} jobs reported · {integer.format(snapshot.metrics.tasksInProgress)} tasks in progress</p><p className="input-help">Network observed {date(snapshot.observedAt)} UTC. {snapshot.reachable ? 'Source reachable at this reading.' : 'Source reports the network as unreachable.'} Public activity across IMD, including work from other applications.</p></> : !overview.busy && !overview.error ? <p className="input-help">Refresh to read the network.</p> : null}

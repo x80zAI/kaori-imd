@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { HASH, displayAmount, receiptText, short } from './domain.mjs';
 import { download } from './download';
 import type { Receipt, Recent } from './types';
+import ToolHeading from './ToolHeading';
+import { currentWorkspaceView } from './workspace-navigation';
 
 function Field({ label, value, link }: { label: string; value: string; link?: string }) {
   return <div className="data-field"><span className="data-label">{label}</span>{link ? <a className="data-value address-value" href={link} target="_blank" rel="noreferrer" title={value}>{value}</a> : <span className="data-value">{value}</span>}</div>;
@@ -17,6 +19,7 @@ export default function ReceiptInspector({ onSave, noteFor, requestedHash }: { o
   const [note, setNote] = useState('');
   const [message, setMessage] = useState('');
   const requestRef = useRef<AbortController | null>(null);
+  const lookupHashRef = useRef('');
   const noteForRef = useRef(noteFor);
   useEffect(() => { noteForRef.current = noteFor; }, [noteFor]);
 
@@ -24,7 +27,8 @@ export default function ReceiptInspector({ onSave, noteFor, requestedHash }: { o
     const normalized = value.trim().toLowerCase();
     requestRef.current?.abort();
     setReceipt(null); setMessage(''); setError('');
-    if (!HASH.test(normalized)) { setBusy(false); setError('Enter a complete Ethereum transaction hash: 0x followed by 64 hexadecimal characters.'); return; }
+    if (!HASH.test(normalized)) { lookupHashRef.current = ''; setBusy(false); setError('Enter a complete Ethereum transaction hash: 0x followed by 64 hexadecimal characters.'); return; }
+    lookupHashRef.current = normalized;
     const controller = new AbortController(); requestRef.current = controller;
     setHash(normalized); setBusy(true); setNote('');
     try {
@@ -33,7 +37,9 @@ export default function ReceiptInspector({ onSave, noteFor, requestedHash }: { o
       if (!response.ok) throw new Error(data.error ?? 'This transaction could not be read. Please try again.');
       if (controller.signal.aborted) return;
       setReceipt(data); setNote(noteForRef.current(normalized));
-      const url = new URL(location.href); url.searchParams.set('tx', normalized); history.replaceState(null, '', url);
+      if (currentWorkspaceView() === 'receipt') {
+        const url = new URL(location.href); url.searchParams.set('tx', normalized); history.replaceState(null, '', url);
+      }
     } catch (failure) {
       if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'Ethereum is unavailable. Please try again.');
     } finally { if (!controller.signal.aborted) setBusy(false); }
@@ -43,6 +49,15 @@ export default function ReceiptInspector({ onSave, noteFor, requestedHash }: { o
     const initialHash = new URLSearchParams(location.search).get('tx');
     if (initialHash) void lookup(initialHash);
     return () => requestRef.current?.abort();
+  }, [lookup]);
+  useEffect(() => {
+    const syncHistory = () => {
+      const transaction = new URLSearchParams(location.search).get('tx')?.trim().toLowerCase();
+      if (currentWorkspaceView() === 'receipt' && transaction && HASH.test(transaction) && transaction !== lookupHashRef.current) void lookup(transaction);
+    };
+    window.addEventListener('popstate', syncHistory);
+    window.addEventListener('hashchange', syncHistory);
+    return () => { window.removeEventListener('popstate', syncHistory); window.removeEventListener('hashchange', syncHistory); };
   }, [lookup]);
   useEffect(() => { if (requestedHash) void lookup(requestedHash.hash); }, [requestedHash, lookup]);
   useEffect(() => {
@@ -62,7 +77,7 @@ export default function ReceiptInspector({ onSave, noteFor, requestedHash }: { o
   }
   return <section className="console-section" id="receipt" aria-labelledby="receipt-heading">
     <div className="container">
-      <div className="section-head"><div><p className="eyebrow"><span className="section-index">01</span> THE RECEIPT DESK</p><h2 className="section-title" id="receipt-heading">A hash in.<br /><span>A story out.</span></h2></div><p className="section-copy">Read the record behind an IMD transfer. Exact amounts, actual addresses, and a timestamp from Ethereum.</p></div>
+      <ToolHeading id="receipt-heading" title="Receipt desk" subtitle="Read the record behind an IMD transfer." bubble="Follow the hash!" />
       <div className="inspector-layout"><div className="inspector-main">
         <form className="query-form" onSubmit={event => { event.preventDefault(); void lookup(hash); }}>
           <label className="field-label" htmlFor="transaction-hash">Ethereum transaction hash</label>

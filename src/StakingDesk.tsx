@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ToolHeading from './ToolHeading';
 import { formatStakingUnits, IMD_DECIMALS, isStakingAddress, parsePendingStaking, parseStakingAmount, parseStakingReading, SIMD_DECIMALS, STAKING_VAULT, ZERO_ADDRESS } from './staking.mjs';
 import type { StakingIntent, StakingReading } from './types';
 
@@ -218,7 +219,7 @@ export default function StakingDesk() {
   const transactionLabel = lastTransaction?.action === 'approve' ? 'Approval' : lastTransaction?.action === 'redeem' ? 'Withdrawal' : 'Deposit';
 
   return <section className="staking-section" id="staking" aria-labelledby="staking-heading"><div className="container">
-    <div className="section-head"><div><p className="eyebrow"><span className="section-index">03</span> THE STAKING DESK</p><h2 className="section-title" id="staking-heading">Put your IMD to work.</h2></div><p className="section-copy">Deposit IMD into the official POOL4 staking vault. Hold sIMD in your wallet, then redeem your shares for IMD here.</p></div>
+    <ToolHeading id="staking-heading" title="IMD staking" subtitle="Deposit IMD and redeem sIMD through the official POOL4 vault." bubble="Your shares. Your wallet!" />
     <div className="staking-layout"><div className="staking-workspace">
       <div className="staking-card">
         <div className="staking-card-head"><span className="eyebrow">IMD / sIMD</span><span className="staking-network"><span className="pixel-dot" /> ETHEREUM MAINNET</span></div>
