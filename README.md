@@ -6,6 +6,10 @@ The receipt desk accepts an Ethereum transaction hash. It reads the original tra
 
 ## Use Kaori
 
+Choose a tool from the workspace navigation. Each utility has its own screen; changing tools keeps in-progress form values, notes and the staking session intact. Existing receipt links and browser back/forward navigation remain available.
+
+The dashboard plays the full Kaori comic film without an audio track, alongside **Every transfer has a story** and its two tool shortcuts. Playback pauses when leaving the dashboard or hiding the tab. Motion controls and the device's reduced-motion preference stop automatic animation; native video controls remain available for manual playback.
+
 1. Paste a transaction hash or choose a recent IMD transaction.
 2. Read its exact IMD transfer amounts, addresses, block time, confirmations, finality and execution gas fee.
 3. Add a note and save a successful IMD receipt to your personal browser archive.
