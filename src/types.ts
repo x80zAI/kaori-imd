@@ -21,3 +21,15 @@ export type ApprovalReading = {
   snapshotBlockNumber: string; snapshotBlockHash: string; snapshotTimestamp: string;
   retrievedAt: string; provider: string; source: string;
 };
+export type StakingWallet = {
+  address: string; imdBalanceRaw: string; shareBalanceRaw: string; redeemableAssetsRaw: string;
+  allowanceRaw: string; maxDepositRaw: string; maxRedeemRaw: string; lastDepositBlock: string; ethBalanceRaw: string;
+};
+export type StakingReading = {
+  chainId: 1; token: string; vault: string; codeHash: string; assetDecimals: 18; shareDecimals: 24;
+  paused: boolean; owner: string; totalAssetsRaw: string; totalSupplyRaw: string; assetsPerShareRaw: string;
+  wallet: StakingWallet | null; quote: { mode: 'deposit' | 'redeem'; amountRaw: string; outputRaw: string } | null;
+  snapshotBlockNumber: string; snapshotBlockHash: string; snapshotTimestamp: string;
+  retrievedAt: string; provider: string; source: string;
+};
+export type StakingIntent = { hash: string; account: string; action: 'approve' | 'deposit' | 'redeem'; amountRaw: string; submittedAfterBlock?: string };
