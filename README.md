@@ -1,6 +1,6 @@
 # Kaori IMD
 
-A pixel manga archive for real IMD transaction receipts and spending approvals on Ethereum. Built for David, with a new ink-blue, cherry-red and warm-ivory identity.
+A pixel manga desk for real IMD transaction receipts, spending approvals and official IMD staking on Ethereum. Built for David, with an ink-blue, cherry-red and warm-ivory identity.
 
 The receipt desk accepts an Ethereum transaction hash. It reads the original transaction, receipt and block, then decodes transfer events emitted by the official IMD contract. Recent transactions come from an actual bounded Ethereum block window. The website starts with an empty personal archive.
 
@@ -13,7 +13,7 @@ The receipt desk accepts an Ethereum transaction hash. It reads the original tra
 
 The archive holds up to 30 records. Browser storage is personal to that browser and device. Restoring a notes backup preserves hashes and notes; open each restored record to retrieve current Ethereum data. Imported files do not supply trusted blockchain readings. If browser storage is unavailable, the website keeps records for the current visit and displays an export reminder. Damaged existing browser data is preserved rather than overwritten.
 
-This is an independent IMD project. Kaori does not connect wallets or submit blockchain transactions. A exported record is a timestamped public RPC reading, not a signed certificate of ownership. Confirmations change after the recorded reading. Gas fee is the execution gas cost; possible blob gas fees are outside that field.
+This is an independent IMD project. The receipt desk and Approval Check remain public reads without wallet signing. The staking desk connects a browser wallet and requests only the explicitly chosen staking transaction. An exported record is a timestamped public RPC reading, not a signed certificate of ownership. Confirmations change after the recorded reading. Gas fee is the execution gas cost; possible blob gas fees are outside that field.
 
 ## IMD Approval Check
 
@@ -23,11 +23,25 @@ The result distinguishes zero allowance, a finite spending limit and the maximum
 
 An allowance is permission, not a token balance or a verdict about an application's safety. The tool checks only the two addresses entered; it does not list all of a wallet's approvals. It does not connect a wallet, request a signature, change approvals or send transactions. Provider or verification failure stays unavailable rather than appearing as zero.
 
+## Official IMD staking
+
+The **Staking** desk deposits IMD into the official POOL4 vault at `0x9efa934d9fad4ae28c998a40195646b965a97247`. It receives sIMD shares in the connected wallet and redeems those shares back into IMD from the same wallet. This is the existing official Ethereum vault, separate from Kaori's future token contract.
+
+Connect a compatible Ethereum browser wallet. EIP-6963 discovery lets users choose between installed wallets, with a legacy injected-provider fallback. On mobile, open Kaori in the wallet's browser. An ordinary browser without a wallet provider cannot sign transactions. No WalletConnect account or API key is required.
+
+1. Choose **Deposit IMD**, enter an amount, and review the current sIMD quote.
+2. If needed, confirm an approval for only that entered IMD amount. Wait for confirmation, then separately select **Deposit IMD** and confirm in the wallet.
+3. Choose **Withdraw IMD**, enter sIMD shares or select **Max**, review the IMD quote, and confirm the redemption in the wallet.
+
+IMD has 18 decimals and sIMD has 24. Inputs and amounts are never rounded through floating-point arithmetic. The vault imposes a one-block redemption hold after shares increase; a fresh `maxRedeem` reading controls availability. All transactions pay Ethereum gas in ETH. The vault has no minimum-output argument: the final amount can change from the displayed preview before inclusion. Kaori does not advertise the official page's launch APR or promise future earnings. POOL4 describes the protocol as unaudited; the UI links its documented risks.
+
+The application verifies the vault's fixed runtime code hash, underlying asset, decimals, chain, pause state, balances and limits. Before prompting the wallet it checks the account/network again, simulates the chosen call and estimates its gas. The wallet signs and submits; the server only reads. An approval never automatically starts a deposit. A submitted hash stays available through account changes and confirmation timeouts, including a session recovery record. Ambiguous wallet outcomes require checking wallet activity before another submission. Confirmation requires two Ethereum confirmations, matching transaction intent, a canonical block and the expected actual token event. Cancellation, revert or a mismatched transaction cannot be reported as a completed stake.
+
 ## Kaori contract
 
 Kaori's own contract address is not configured. The website displays **Coming Soon**, and copying the contract is disabled while the address is empty. David will supply the address; set the single `KAORI_CONTRACT` value in `src/domain.mjs` when it is available. A valid Ethereum address will then appear with its matching copy button and Etherscan link.
 
-The official IMD contract used by the receipt desk is an external data source, separate from Kaori's future contract. Keeping Kaori's contract empty does not replace or invent the source of existing IMD transaction records.
+The official IMD token and sIMD staking vault are external contracts, separate from Kaori's future contract. Keeping Kaori's contract empty does not replace or invent either official contract.
 
 ## Public links
 
@@ -74,4 +88,4 @@ Vercel uses Node.js 24, `npm ci`, `npm run build` and the `dist` output. The API
 
 ## Brand and content
 
-The character, website illustration and X header were created with the built-in image generation tool. The final square profile image and X header are included in the delivery's `artifacts/brand` folder. Prompts are included in `PROMPTS.txt`. The project film shows actual website screens and an actual public IMD transaction. Publication text is in `artifacts/social/article.txt` and `post.txt`.
+The character, website illustration and X header were created with the built-in image generation tool. The square profile image and X header are in `artifacts/brand`. Media source files and social deliverables stay in their own artifact folders, outside the production website. Public content must preserve the Kaori identity and make only verified utility claims.

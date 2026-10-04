@@ -175,7 +175,7 @@ test('recent list groups repeated transfers, sorts newest first and verifies can
   const result = await service(rpc).getRecent();
   assert.equal(result.fromBlock, '0');
   assert.deepEqual(result.transactions, [{ hash: secondHash, blockNumber: '190', transferCount: 1 }, { hash: HASH, blockNumber: '190', transferCount: 2 }]);
-  assert.equal(rpc.calls[1].requests.find((item) => item.method === 'eth_getLogs').params[0].toBlock, '0xc8');
+  assert.equal(rpc.calls.flatMap(call => call.requests).find((item) => item.method === 'eth_getLogs').params[0].toBlock, '0xc8');
 });
 
 test('recent window is bounded and genuinely empty logs remain an empty list', async () => {
@@ -184,6 +184,134 @@ test('recent window is bounded and genuinely empty logs remain an empty list', a
   assert.equal(result.blockNumber, '10000');
   assert.equal(result.fromBlock, '7001');
   assert.deepEqual(result.transactions, []);
+});
+
+function chunkLog(number, hashNumber, transactionIndex = 0, logIndex = 0) {
+  return log({ blockNumber: hex(number), blockHash: word(number), transactionHash: word(hashNumber), transactionIndex: hex(transactionIndex), logIndex: hex(logIndex) });
+}
+
+function chunkRpc(getLogs) {
+  const seen = new Map();
+  const sizes = [];
+  const rpc = mockRpc({
+    eth_getLogs: async (params, url) => {
+      const values = await getLogs(params[0], url);
+      if (Array.isArray(values)) {
+        sizes.push(Buffer.byteLength(JSON.stringify([{ jsonrpc: '2.0', id: 1, result: values }])));
+        for (const value of values) {
+          const key = `${url}:${BigInt(value.blockNumber)}`;
+          if (!seen.has(key)) seen.set(key, []);
+          seen.get(key)[Number(BigInt(value.transactionIndex))] = value.transactionHash;
+        }
+      }
+      return values;
+    },
+    eth_getBlockByNumber: (params, url) => {
+      const number = params[0] === 'latest' ? 10_000n : BigInt(params[0]);
+      return block(number, number === 10_000n ? HEAD_HASH : word(number), seen.get(`${url}:${number}`) ?? []);
+    },
+  });
+  return { ...rpc, sizes };
+}
+
+function scannedRanges(rpc, providerName = null) {
+  return rpc.calls.filter(call => !providerName || call.url.includes(providerName)).flatMap(call => call.requests)
+    .filter(request => request.method === 'eth_getLogs').map(request => [BigInt(request.params[0].fromBlock), BigInt(request.params[0].toBlock)]);
+}
+
+test('recent scans newest complete 500-block chunks and stops after eight distinct hashes', async () => {
+  const rpc = chunkRpc(params => {
+    if (BigInt(params.toBlock) === 10_000n) return [chunkLog(9_999n, 1n), chunkLog(9_998n, 2n)];
+    return Array.from({ length: 7 }, (_, index) => chunkLog(9_450n - BigInt(index), BigInt(index + 3)));
+  });
+  const result = await service(rpc).getRecent();
+  assert.equal(result.fromBlock, '9001');
+  assert.equal(result.transactions.length, 8);
+  assert.deepEqual(result.transactions.map(item => item.hash), Array.from({ length: 8 }, (_, index) => word(index + 1)));
+  assert.deepEqual(scannedRanges(rpc), [[9_501n, 10_000n], [9_001n, 9_500n]]);
+  assert.ok(rpc.calls.filter(call => call.requests.some(request => request.method === 'eth_getLogs')).every(call => call.requests.length === 1));
+});
+
+test('an empty recent window scans every contiguous chunk without exceeding 3000 blocks', async () => {
+  const rpc = chunkRpc(() => []);
+  const result = await service(rpc).getRecent();
+  assert.equal(result.fromBlock, '7001');
+  assert.deepEqual(result.transactions, []);
+  const ranges = scannedRanges(rpc);
+  assert.equal(ranges.length, 6);
+  assert.equal(ranges.reduce((total, [start, end]) => total + end - start + 1n, 0n), 3_000n);
+  assert.equal(ranges[0][1], 10_000n);
+  assert.equal(ranges.at(-1)[0], 7_001n);
+  for (let index = 1; index < ranges.length; index += 1) assert.equal(ranges[index][1], ranges[index - 1][0] - 1n);
+});
+
+test('recent handles an aggregate log result over two megabytes using bounded separate responses', async () => {
+  const newest = Array.from({ length: 1_900 }, (_, index) => chunkLog(9_999n, BigInt(index % 7 + 1), index % 7, index));
+  const older = Array.from({ length: 1_900 }, (_, index) => chunkLog(9_400n, 8n, 0, index));
+  const rpc = chunkRpc(params => BigInt(params.toBlock) === 10_000n ? newest.toReversed() : older.toReversed());
+  const result = await service(rpc).getRecent();
+  assert.equal(result.transactions.length, 8);
+  assert.equal(result.fromBlock, '9001');
+  assert.ok(rpc.sizes.every(size => size < 2_000_000));
+  assert.ok(rpc.sizes.reduce((total, size) => total + size, 0) > 2_000_000);
+  assert.deepEqual(result.transactions.map(item => item.hash), [7n, 6n, 5n, 4n, 3n, 2n, 1n, 8n].map(word));
+  assert.equal(result.transactions.at(-1).transferCount, 1_900);
+  assert.equal(result.transactions.reduce((total, item) => total + item.transferCount, 0), 3_800);
+});
+
+test('recent rejects logs outside their own chunk, removed events and cross-chunk conflicts', async () => {
+  for (const getLogs of [
+    () => [chunkLog(9_500n, 1n)],
+    () => [chunkLog(10_001n, 1n)],
+    () => [{ ...chunkLog(9_999n, 1n), removed: true }],
+    params => BigInt(params.toBlock) === 10_000n ? [chunkLog(9_999n, 1n)] : [chunkLog(9_400n, 1n)],
+  ]) await assert.rejects(service(chunkRpc(getLogs)).getRecent(), error => error.status === 503);
+});
+
+test('recent chunk failure never returns partial data and fallback restarts the entire observation', async () => {
+  const primaryOnly = chunkRpc(params => BigInt(params.toBlock) === 10_000n ? [chunkLog(9_999n, 90n)] : { rpcError: { code: -32000, message: 'Chunk unavailable' } });
+  await assert.rejects(service(primaryOnly).getRecent(), error => error.status === 503);
+  const rpc = chunkRpc((params, url) => {
+    if (url.includes('primary')) return BigInt(params.toBlock) === 10_000n ? [chunkLog(9_999n, 90n)] : { rpcError: { code: -32000, message: 'Chunk unavailable' } };
+    return Array.from({ length: 8 }, (_, index) => chunkLog(9_999n - BigInt(index), BigInt(index + 1)));
+  });
+  const result = await service(rpc, { providers: [provider('Primary'), provider('Secondary')] }).getRecent();
+  assert.equal(result.provider, 'Secondary');
+  assert.equal(result.fromBlock, '9501');
+  assert.ok(result.transactions.every(item => item.hash !== word(90n)));
+  assert.deepEqual(scannedRanges(rpc, 'primary'), [[9_501n, 10_000n], [9_001n, 9_500n]]);
+  assert.deepEqual(scannedRanges(rpc, 'secondary'), [[9_501n, 10_000n]]);
+});
+
+test('recent keeps the two-megabyte bound on every individual chunk response', async () => {
+  const rpc = chunkRpc(() => [{ ...chunkLog(9_999n, 1n), extra: 'x'.repeat(2_000_001) }]);
+  await assert.rejects(service(rpc).getRecent(), error => error.status === 503);
+  const ranges = scannedRanges(rpc);
+  assert.ok(ranges.length > 1);
+  assert.deepEqual(ranges.at(-1), [10_000n, 10_000n]);
+  assert.ok(ranges.every(([start, end]) => end === 10_000n && end - start + 1n <= 500n));
+});
+
+test('an oversized recent chunk is discarded and a smaller same-provider range can succeed', async () => {
+  const rpc = chunkRpc(params => {
+    const width = BigInt(params.toBlock) - BigInt(params.fromBlock) + 1n;
+    if (width > 250n) return [{ ...chunkLog(9_999n, 90n), extra: 'x'.repeat(2_000_001) }];
+    return Array.from({ length: 8 }, (_, index) => chunkLog(9_999n - BigInt(index), BigInt(index + 1)));
+  });
+  const result = await service(rpc).getRecent();
+  assert.equal(result.provider, 'Primary');
+  assert.equal(result.fromBlock, '9751');
+  assert.equal(result.transactions.length, 8);
+  assert.ok(result.transactions.every(item => item.hash !== word(90n)));
+  assert.deepEqual(scannedRanges(rpc), [[9_501n, 10_000n], [9_751n, 10_000n]]);
+});
+
+test('recent chunks share the original provider deadline rather than each receiving a new deadline', async () => {
+  const rpc = chunkRpc(async () => { await new Promise(resolve => setTimeout(resolve, 12)); return []; });
+  const started = Date.now();
+  await assert.rejects(service(rpc, { timeoutMs: 20 }).getRecent(), error => error.status === 503);
+  assert.ok(Date.now() - started < 250);
+  assert.ok(scannedRanges(rpc).length < 6);
 });
 
 test('recent returns at most eight distinct transaction hashes and rejects out-of-window or conflicting records', () => {

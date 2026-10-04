@@ -27,7 +27,7 @@ export function sendJson(response, status, body, extraHeaders = {}) {
 }
 
 export function createApiHandler(kind, service) {
-  if (!['receipt', 'recent', 'allowance'].includes(kind)) throw new Error('Invalid API route');
+  if (!['receipt', 'recent', 'allowance', 'staking'].includes(kind)) throw new Error('Invalid API route');
   return async function handler(request, response) {
     try {
       if (request.method !== 'GET') {
@@ -41,6 +41,12 @@ export function createApiHandler(kind, service) {
       if (kind === 'recent') {
         if (keys.length) throw new PublicError('This endpoint does not accept query parameters.', 400, 'invalid');
         result = await service.getRecent();
+      } else if (kind === 'staking') {
+        if (keys.some((key) => !['owner', 'mode', 'amount'].includes(key)) || new Set(keys).size !== keys.length ||
+          (keys.includes('mode') || keys.includes('amount')) && !(keys.includes('owner') && keys.includes('mode') && keys.includes('amount'))) {
+          throw new PublicError('Provide an optional wallet address, or one wallet, mode and amount for a staking quote.', 400, 'invalid');
+        }
+        result = await service.getStaking(url.searchParams.get('owner'), url.searchParams.get('mode'), url.searchParams.get('amount'));
       } else if (kind === 'allowance') {
         if (keys.length !== 2 || keys.filter((key) => key === 'owner').length !== 1 || keys.filter((key) => key === 'spender').length !== 1) {
           throw new PublicError('Provide one wallet address using owner and one application address using spender.', 400, 'invalid');

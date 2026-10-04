@@ -2,6 +2,7 @@ export const IMD_CONTRACT = '0xD34a99Bc0f67aE1bbd63C660e6d0b0dd03E263B7';
 export const IMD_DECIMALS = 18;
 export const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 export const RECENT_BLOCKS = 3_000n;
+const RECENT_CHUNK_BLOCKS = 500n;
 export const PUBLIC_PROVIDERS = Object.freeze([
   { name: 'PublicNode', url: 'https://ethereum-rpc.publicnode.com' },
   { name: 'Reth public RPC', url: 'https://ethereum.reth.rs/rpc' },
@@ -252,12 +253,38 @@ async function readSnapshot(provider, kind, hash, fetchImpl, signal, now) {
   ];
   const common = { chainId: 1, contract: IMD_CONTRACT, retrievedAt: '', provider: provider.name };
   if (kind === 'recent') {
-    const fromBlock = snapshot.number >= RECENT_BLOCKS - 1n ? snapshot.number - RECENT_BLOCKS + 1n : 0n;
-    const [code, decimals, logs] = await rpcBatch(provider, [...validation,
-      { method: 'eth_getLogs', params: [{ address: IMD_CONTRACT, topics: [TRANSFER_TOPIC], fromBlock: quantityHex(fromBlock), toBlock: blockTag }] },
-    ], fetchImpl, signal);
+    const windowStart = snapshot.number >= RECENT_BLOCKS - 1n ? snapshot.number - RECENT_BLOCKS + 1n : 0n;
+    const [code, decimals] = await rpcBatch(provider, validation, fetchImpl, signal);
     validateContract(code, decimals);
-    const recent = decodeRecentTransfers(logs, fromBlock, snapshot.number);
+    const logs = [];
+    let toBlock = snapshot.number;
+    let chunkBlocks = RECENT_CHUNK_BLOCKS;
+    let fromBlock = windowStart;
+    let recent = [];
+    while (toBlock >= windowStart) {
+      const chunkStart = toBlock >= chunkBlocks - 1n ? toBlock - chunkBlocks + 1n : 0n;
+      fromBlock = chunkStart > windowStart ? chunkStart : windowStart;
+      let chunk;
+      try {
+        [chunk] = await rpcBatch(provider, [
+          { method: 'eth_getLogs', params: [{ address: IMD_CONTRACT, topics: [TRANSFER_TOPIC], fromBlock: quantityHex(fromBlock), toBlock: quantityHex(toBlock) }] },
+        ], fetchImpl, signal);
+      } catch (error) {
+        if (error instanceof Error && error.message === 'RPC response too large' && chunkBlocks > 1n) {
+          // Retry only a smaller range, on this same provider and under the original deadline.
+          chunkBlocks /= 2n;
+          continue;
+        }
+        throw error;
+      }
+      // Each HTTP body retains its size bound, and every chunk must fit its own requested range.
+      decodeRecentTransfers(chunk, fromBlock, toBlock);
+      logs.push(...chunk);
+      recent = decodeRecentTransfers(logs, fromBlock, snapshot.number);
+      // Entire blocks are scanned, so all transfer events for these newest transactions are present.
+      if (recent.length === 8 || fromBlock === windowStart) break;
+      toBlock = fromBlock - 1n;
+    }
     const blockNumbers = [...new Set(recent.map((item) => item.blockNumber.toString()))];
     const [head, ...blocks] = await rpcBatch(provider, [
       { method: 'eth_getBlockByNumber', params: [blockTag, false] },
