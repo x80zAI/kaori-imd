@@ -8,6 +8,7 @@
     { "source": "/api/receipt", "destination": "/api/receipt" },
     { "source": "/api/recent", "destination": "/api/recent" },
     { "source": "/api/allowance", "destination": "/api/allowance" },
+    { "source": "/api/staking", "destination": "/api/staking" },
     { "source": "/((?!api(?:/|$)).*)", "destination": "/index.html" }
   ],
   "headers": [
