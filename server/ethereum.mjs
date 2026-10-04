@@ -64,12 +64,12 @@ function rpcAddress(value, nullable = false) {
   return value.toLowerCase();
 }
 
-function decodeWord(value) {
+export function decodeWord(value) {
   if (typeof value !== 'string' || !WORD.test(value)) throw new Error('Invalid ABI word');
   return BigInt(value);
 }
 
-function quantityHex(value) { return `0x${value.toString(16)}`; }
+export function quantityHex(value) { return `0x${value.toString(16)}`; }
 
 function timestampIso(value) {
   const seconds = parseQuantity(value);
@@ -77,7 +77,7 @@ function timestampIso(value) {
   return new Date(Number(seconds) * 1_000).toISOString();
 }
 
-function readBlock(value, expectedNumber, expectedHash) {
+export function readBlock(value, expectedNumber, expectedHash) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Block is unavailable');
   const block = {
     number: parseQuantity(value.number), hash: rpcHash(value.hash), timestamp: timestampIso(value.timestamp),
@@ -195,7 +195,7 @@ async function readBody(response) {
   }
 }
 
-async function rpcBatch(provider, requests, fetchImpl, signal) {
+export async function rpcBatch(provider, requests, fetchImpl, signal) {
   const payload = requests.map(({ method, params }, index) => ({ jsonrpc: '2.0', id: index + 1, method, params }));
   const response = await fetchImpl(provider.url, {
     method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
@@ -218,7 +218,7 @@ async function rpcBatch(provider, requests, fetchImpl, signal) {
   return requests.map((_, index) => byId.get(index + 1));
 }
 
-async function withDeadline(operation, timeoutMs) {
+export async function withDeadline(operation, timeoutMs) {
   const controller = new AbortController();
   let timer;
   const deadline = new Promise((_, reject) => {
@@ -228,7 +228,7 @@ async function withDeadline(operation, timeoutMs) {
   finally { clearTimeout(timer); controller.abort(); }
 }
 
-function validateContract(code, decimals) {
+export function validateContract(code, decimals) {
   if (typeof code !== 'string' || !/^0x(?:[0-9a-fA-F]{2})+$/.test(code) || /^0x(?:00)+$/.test(code)) throw new Error('IMD contract is unavailable');
   if (decodeWord(decimals) !== BigInt(IMD_DECIMALS)) throw new Error('Unexpected IMD decimals');
 }

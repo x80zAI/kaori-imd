@@ -27,7 +27,7 @@ export function sendJson(response, status, body, extraHeaders = {}) {
 }
 
 export function createApiHandler(kind, service) {
-  if (!['receipt', 'recent'].includes(kind)) throw new Error('Invalid API route');
+  if (!['receipt', 'recent', 'allowance'].includes(kind)) throw new Error('Invalid API route');
   return async function handler(request, response) {
     try {
       if (request.method !== 'GET') {
@@ -41,6 +41,11 @@ export function createApiHandler(kind, service) {
       if (kind === 'recent') {
         if (keys.length) throw new PublicError('This endpoint does not accept query parameters.', 400, 'invalid');
         result = await service.getRecent();
+      } else if (kind === 'allowance') {
+        if (keys.length !== 2 || keys.filter((key) => key === 'owner').length !== 1 || keys.filter((key) => key === 'spender').length !== 1) {
+          throw new PublicError('Provide one wallet address using owner and one application address using spender.', 400, 'invalid');
+        }
+        result = await service.getAllowance(url.searchParams.get('owner'), url.searchParams.get('spender'));
       } else {
         if (keys.length !== 1 || keys[0] !== 'hash') throw new PublicError('Provide one transaction hash using the hash parameter.', 400, 'invalid');
         result = await service.getReceipt(url.searchParams.get('hash'));
