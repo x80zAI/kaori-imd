@@ -1,6 +1,6 @@
 # Kaori IMD sources and data boundaries
 
-Kaori IMD is an independent, read-only personal project. It reads Ethereum mainnet transactions and displays `Transfer` events emitted by the official Ethereum IMD contract. It does not send transactions or request a wallet connection.
+Kaori IMD is an independent personal project. Its receipt desk and Approval Check read public Ethereum data. Its staking desk uses a connected browser wallet for explicitly selected transactions in the official POOL4 vault; the server never signs or sends transactions.
 
 ## Primary sources
 
@@ -9,6 +9,10 @@ Kaori IMD is an independent, read-only personal project. It reads Ethereum mainn
 - [Ethereum execution API specification](https://ethereum.github.io/execution-apis/) defines the `finalized` block tag and the RPC field formats.
 - [ERC-20 specification](https://eips.ethereum.org/EIPS/eip-20) defines the `Transfer(address,address,uint256)` event and `allowance(address,address)` remaining spending permission.
 - [PublicNode Ethereum endpoint](https://ethereum.publicnode.com/) publishes `https://ethereum-rpc.publicnode.com`. The fallback endpoint is `https://ethereum.reth.rs/rpc`.
+- [Official POOL4 documentation](https://pool4.imd.fun/docs#staking) identifies the sIMD vault and explains staking, its one-block hold and protocol risks.
+- [Verified StakedIMD contract](https://etherscan.io/address/0x9efa934d9fad4ae28c998a40195646b965a97247#code) publishes the deployed source and ABI. It uses Solady ERC-4626 with an 18-decimal asset and a six-decimal share offset: sIMD has 24 decimals.
+- [ERC-4626 specification](https://eips.ethereum.org/EIPS/eip-4626) defines vault shares, preview functions, deposits and redemptions.
+- [EIP-6963](https://eips.ethereum.org/EIPS/eip-6963) and [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193) define browser wallet discovery and provider requests.
 
 ## What the application verifies
 
@@ -22,7 +26,7 @@ All amounts, block numbers, confirmations and gas quantities use exact integer a
 
 ## Recent transactions
 
-The recent list reads only official IMD `Transfer` logs in the latest 3,000 blocks of its fixed snapshot. It verifies the canonical blocks of the returned transactions and returns at most eight distinct transaction hashes. Multiple transfer events in one transaction are counted together. An empty result means no matching transfers were returned in that bounded window; it is not a claim about the entire token history. The list does not preload invented hashes or records.
+The recent list reads only official IMD `Transfer` logs, scanning backwards from its fixed snapshot in separate chunks of at most 500 blocks. A response exceeding the two-megabyte limit is discarded and retried with a smaller range on the same provider; even a one-block response must fit that limit. It stops after finding eight distinct transaction hashes or scanning the latest 3,000 blocks. `fromBlock` reports the start of the complete chunks actually scanned. Every chunk must fit its requested range, and the entire attempt keeps its 12-second provider deadline. Any remaining chunk failure invalidates the whole attempt; fallback restarts with one provider. It verifies the canonical blocks of the returned transactions and returns at most eight distinct transaction hashes. Multiple transfer events in one transaction are counted together. An empty result means no matching transfers were returned in that full bounded window; it is not a claim about the entire token history. The list does not preload invented hashes or records.
 
 ## IMD spending approvals
 
@@ -31,6 +35,18 @@ The recent list reads only official IMD `Transfer` logs in the latest 3,000 bloc
 The API returns the exact uint256 base-unit amount and an exact 18-decimal IMD amount, alongside the wallet, spender, contract, block number/hash/time, retrieval time and provider. Only `(2^256) - 1` is labeled maximum approval. A finite large amount is not converted to maximum or rounded. The frontend verifies the expected wallet/spender, official token, exact amount and maximum flag before showing a result.
 
 Zero is shown only after a successful verified Ethereum reading. Invalid, inconsistent or unavailable data produces an error. The check is specific to the entered pair; it does not discover all approvals, read wallet ownership, equate allowance with balance, assess application safety, or revoke permission. No wallet signature is requested.
+
+## Official IMD staking boundaries
+
+`GET /api/staking` reads the verified official Ethereum vault at `0x9efa934d9fad4ae28c998a40195646b965a97247`. An optional non-zero `owner` adds real IMD/sIMD balances, allowance, redemption value, ETH balance and deposit/redemption limits. A quote requires the same owner plus `mode=deposit` or `mode=redeem` and a positive decimal uint256 `amount` in base units. Unknown or duplicate parameters are rejected. Wallet readings and quotes are always fresh; global observations may be reused for ten seconds. Unique concurrent requests are bounded to 32.
+
+All calls in a reading use one numbered block. The service checks Ethereum mainnet, official IMD code and 18 decimals, vault runtime keccak hash `0xe8333ecf3ae9263b14d6a1ab59d6f384c16d8609c1725edf31b0dcd1780280e5`, `asset()`, 24 share decimals, pause/ownership state, exact amounts and consistency with the verified virtual-share conversion. It rechecks the canonical block hash. Provider fallback repeats the whole observation. Failures remain unavailable, never zero balances or usable quotes.
+
+Wallet submissions are limited to `approve(vault, exactAmount)` on IMD, `deposit(assets, connectedAccount)` on sIMD, and `redeem(shares, connectedAccount, connectedAccount)` on sIMD. The browser repeats current contract, balance, allowance and limit checks and performs an `eth_call` simulation and gas estimate before asking the wallet to send. Accounts or networks changing before submission stop that action. Once the wallet returns a transaction hash, the original intent is retained and can be checked on Ethereum even if the wallet context changes.
+
+Confirmation is not inferred from a returned hash. It requires two confirmations, matching sender/recipient/calldata and zero ETH transfer value, a canonical receipt and the exact official `Approval`, `Deposit` or `Withdraw` event. A repriced transaction must preserve its intent and match the original nonce. The UI shows actual confirmed event amounts instead of repeating the preview. Timeouts preserve the pending hash; reverts or cancellations do not become successful stakes.
+
+The standard vault methods do not enforce a minimum output. The interface therefore labels previews as quotes that may change. There is no claimed fixed APR, future gain, token price, proprietary Kaori staking pool or Kaori custody. POOL4's official documentation describes the protocol as unaudited. Owner powers are presented according to the current verified `owner()` reading; a zero owner means ownership has been renounced. Development verification uses read-only calls, public historical transactions and isolated fixtures, without submitting funds.
 
 ## Storage and availability
 
