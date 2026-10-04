@@ -9,6 +9,7 @@ const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 const PAGE_SIZE = 20;
 const MAX_BYTES = 2_000_000;
 const VIEWS = ['overview', 'jobs', 'oracles', 'job', 'oracle'];
+const ORACLE_ANSWER_TYPES = new Set(['bool', 'address', 'bytes32', 'uint256', 'address[]', 'bytes32[]']);
 const unavailable = () => new PublicError('IMD network data is unavailable right now. Please try again shortly.');
 const invalid = () => new PublicError('Choose a valid network view and its supported search parameters.', 400, 'invalid');
 
@@ -43,6 +44,7 @@ function decimalId(value) {
 function address(value) { if (value == null) return null; if (typeof value !== 'string' || !ADDRESS.test(value)) throw unavailable(); return value.toLowerCase(); }
 function array(value, max) { if (!Array.isArray(value) || value.length > max) throw unavailable(); return value; }
 function status(value) { if (typeof value !== 'string' || !/^[a-zA-Z0-9_:. -]{1,60}$/.test(value)) throw unavailable(); return value; }
+function answerType(value) { if (!ORACLE_ANSWER_TYPES.has(value)) throw unavailable(); return value; }
 function sourceFor(view, id) {
   return view === 'job' ? `${EXPLORER}/jobs/${uuid(id)}` : view === 'agent' ? `${EXPLORER}/agents/${decimalId(id)}` : `${API}/oracle/requests/${uuid(id)}?members=0`;
 }
@@ -113,7 +115,7 @@ function normalizeJob(raw) {
 }
 function normalizeOracle(raw) {
   const id = uuid(raw.id);
-  return { id, status: status(raw.status), question: text(raw.question), chainId: count(raw.chainId), answerType: status(raw.answerType),
+  return { id, status: status(raw.status), question: text(raw.question), chainId: count(raw.chainId), answerType: answerType(raw.answerType),
     jobId: raw.jobId == null ? null : uuid(raw.jobId), createdAt: timestamp(raw.createdAt), updatedAt: timestamp(raw.updatedAt), attestedAt: optionalTime(raw.attestedAt), sourceUrl: sourceFor('oracle', id) };
 }
 function resultText(value) {
