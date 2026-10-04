@@ -42,7 +42,7 @@ h1, h2, h3, p { margin: 0; }
 .brand-avatar { width: 48px; height: 48px; object-fit: cover; image-rendering: pixelated; border: 2px solid var(--ink); box-shadow: 3px 3px 0 var(--cherry); }
 .brand-wordmark { font-family: var(--pixel-font); font-size: 1.6875rem; font-weight: 700; line-height: 1; letter-spacing: -.04em; }
 .brand-wordmark span { color: var(--cherry-dark); }
-.nav-links { display: flex; align-items: center; gap: 2rem; margin-left: auto; }
+.nav-links { display: flex; align-items: center; gap: 1.4rem; margin-left: auto; }
 .nav-links a, .footer-nav a { font-size: .6875rem; font-weight: 600; letter-spacing: .025em; line-height: 1.7; }
 .nav-links a { position: relative; padding-block: .6rem; }
 .nav-links a::after { content: ''; position: absolute; left: 0; right: 100%; bottom: 0; height: 2px; background: var(--cherry); transition: right .16s; }
@@ -169,6 +169,40 @@ h1, h2, h3, p { margin: 0; }
 .recent-panel .status-message { margin: 1rem; padding: .75rem; }
 .loading { animation: pixel-blink 1s steps(2, end) infinite; }
 @keyframes pixel-blink { 50% { opacity: .4; } }
+
+.approval-section { padding-block: 80px; background: var(--paper-light); border-bottom: 2px solid var(--ink); }
+.approval-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 2rem; align-items: start; }
+.approval-workspace { min-width: 0; }
+.approval-form { display: grid; gap: 1.5rem; padding: 1.5rem; border: 2px solid var(--ink); background: var(--paper); box-shadow: 5px 5px 0 var(--ink); }
+.approval-form > .button { justify-self: start; }
+.approval-input { display: block; width: 100%; min-width: 0; min-height: 49px; padding: .875rem; border: 2px solid var(--ink); background: var(--paper-light); color: var(--ink); font-size: .8125rem; }
+.approval-input::placeholder { color: var(--muted); opacity: 1; }
+.approval-form .input-help { margin-top: .5rem; }
+.approval-form .status-message { margin-top: 0; }
+.approval-form .status-message.error { color: #a72036; background: #ffdae0; }
+.approval-guide { min-width: 0; padding: 1.75rem; background: var(--ink); color: var(--paper); border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--cherry); }
+.approval-guide h3 { margin-block: 1rem; font-family: var(--pixel-font); font-size: 2.25rem; line-height: 1.05; }
+.approval-guide p, .approval-guide li { font-size: .8125rem; line-height: 1.85; }
+.approval-guide ul { padding-left: 1.125rem; margin-block: 1.25rem; }
+.approval-guide li + li { margin-top: .75rem; }
+.approval-guide strong { color: #ff9aa8; }
+.approval-guide-note { padding-top: 1rem; border-top: 1px dashed #777784; color: #d7d1cf; }
+.approval-empty { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; padding: 1.5rem; border: 2px dashed #94939b; }
+.approval-empty h3, .approval-result h3 { font-family: var(--pixel-font); font-size: 1.75rem; line-height: 1.1; }
+.approval-empty p { margin-top: .5rem; font-size: .8125rem; line-height: 1.85; }
+.approval-seal { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border: 2px solid var(--ink); background: var(--cherry); box-shadow: 3px 3px 0 var(--ink); font-family: var(--pixel-font); font-size: 2rem; }
+.approval-result { min-width: 0; margin-top: 1.5rem; border: 2px solid var(--ink); background: var(--paper); box-shadow: 5px 5px 0 var(--ink); }
+.approval-result-head { padding: 1.5rem; border-bottom: 2px dashed var(--ink); }
+.approval-result h3 { margin-top: .75rem; }
+.approval-result-head > p { margin-top: .75rem; font-size: .8125rem; line-height: 1.85; }
+.approval-maximum .approval-result-head { background: #ffdae0; }
+.approval-amount { padding: 1.25rem 1.5rem 0; }
+.approval-amount p { font-family: var(--pixel-font); font-size: 1.5rem; line-height: 1.45; overflow-wrap: anywhere; }
+.approval-amount strong { font-weight: 600; }
+.approval-amount p > span { font-family: 'IBM Plex Mono', monospace; font-size: .75rem; }
+.approval-result-footer { padding: 0 1.5rem 1.25rem; border-top: 1px solid var(--line); }
+.approval-result-footer > .input-help { margin-top: 1rem; }
+.approval-result-footer .receipt-actions { padding: 1rem 0 0; }
 
 .story-section { padding-block: 80px; border-bottom: 2px solid var(--ink); background-color: var(--paper); background-image: radial-gradient(rgba(23, 27, 44, .16) .6px, transparent .6px); background-size: 6px 6px; }
 .story-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin-bottom: 2rem; }
@@ -333,7 +367,14 @@ h1, h2, h3, p { margin: 0; }
   .art-caption { padding: 10px 3px 2px; font-size: .6875rem; }
   .ticker-track { min-height: 40px; gap: 1.5rem; font-size: .875rem; }
   .ticker-track span { gap: 1.5rem; }
-  .console-section, .story-section, .archive-section { padding-block: 56px; }
+  .console-section, .story-section, .archive-section, .approval-section { padding-block: 56px; }
+  .approval-layout { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .approval-form, .approval-guide, .approval-result-head { padding: 1rem; }
+  .approval-input { font-size: .75rem; }
+  .approval-guide h3 { font-size: 2rem; }
+  .approval-amount { padding: 1rem 1rem 0; }
+  .approval-result-footer { padding: 0 1rem 1rem; }
+  .approval-empty { padding: 1.25rem 1rem; }
   .section-head { grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-bottom: 1.75rem; }
   .section-index { width: 31px; height: 31px; margin-top: .1875rem; font-size: 1.25rem; }
   .section-title { font-size: clamp(2rem, 8vw, 2.75rem); }
