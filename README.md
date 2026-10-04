@@ -1,6 +1,6 @@
 # Kaori IMD
 
-A pixel manga desk for real IMD transaction receipts, spending approvals and official IMD staking on Ethereum. Built for David, with an ink-blue, cherry-red and warm-ivory identity.
+A pixel manga desk for real IMD transaction receipts, spending approvals, official IMD staking and public network activity. Built for David, with an ink-blue, cherry-red and warm-ivory identity.
 
 The receipt desk accepts an Ethereum transaction hash. It reads the original transaction, receipt and block, then decodes transfer events emitted by the official IMD contract. Recent transactions come from an actual bounded Ethereum block window. The website starts with an empty personal archive.
 
@@ -36,6 +36,18 @@ Connect a compatible Ethereum browser wallet. EIP-6963 discovery lets users choo
 IMD has 18 decimals and sIMD has 24. Inputs and amounts are never rounded through floating-point arithmetic. The vault imposes a one-block redemption hold after shares increase; a fresh `maxRedeem` reading controls availability. All transactions pay Ethereum gas in ETH. The vault has no minimum-output argument: the final amount can change from the displayed preview before inclusion. Kaori does not advertise the official page's launch APR or promise future earnings. POOL4 describes the protocol as unaudited; the UI links its documented risks.
 
 The application verifies the vault's fixed runtime code hash, underlying asset, decimals, chain, pause state, balances and limits. Before prompting the wallet it checks the account/network again, simulates the chosen call and estimates its gas. The wallet signs and submits; the server only reads. An approval never automatically starts a deposit. A submitted hash stays available through account changes and confirmation timeouts, including a session recovery record. Ambiguous wallet outcomes require checking wallet activity before another submission. Confirmation requires two Ethereum confirmations, matching transaction intent, a canonical block and the expected actual token event. Cancellation, revert or a mismatched transaction cannot be reported as a completed stake.
+
+## IMD network desk
+
+The **Network desk** reads Identity.md's official public API. It brings network activity, agent records, jobs and oracle questions into Kaori with their source and retrieval time. These are records from the wider IMD network; displaying a job does not mean Kaori commissioned or produced it.
+
+Use the agent search to find a seat or agent and filter working seats. Search public job objectives or oracle questions, inspect a record, and follow its official source. Lists load in bounded pages. Network counts and per-seat records describe different parts of the protocol and are not interchangeable.
+
+Save agent, job and oracle references with personal notes to a separate watchlist in this browser. It starts empty and is independent of the transaction receipt archive. Reopen a saved reference to get its current status. Export the watchlist to preserve its references and notes; export an individual reading to keep its actual data and retrieval time. Storage failure is reported instead of silently discarding records.
+
+Oracle answers are public protocol results. Signature availability is not a claim that Kaori independently verified the signature, the answer or the evidence. Network API readings are separate from the receipt desk's Ethereum block verification.
+
+The network desk does not submit paid requests or spend from a project wallet. SI-MD was functional inspiration; Kaori uses its own interface and calls the official IMD service directly through its own bounded server endpoint. There is no connection to SI-MD's treasury, token, private memory or paid orders.
 
 ## Kaori contract
 
