@@ -3,6 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import receiptHandler from '../api/receipt.js';
 import recentHandler from '../api/recent.js';
+import allowanceHandler from '../api/allowance.js';
 import { parseRequestUrl, sendJson } from './http.mjs';
 import { createStaticHandler } from './static.mjs';
 import { PublicError } from './ethereum.mjs';
@@ -17,6 +18,7 @@ const server = createServer(async (request, response) => {
     const { pathname } = parseRequestUrl(request.url);
     if (pathname === '/api/receipt') return await receiptHandler(request, response);
     if (pathname === '/api/recent') return await recentHandler(request, response);
+    if (pathname === '/api/allowance') return await allowanceHandler(request, response);
     if (pathname === '/api' || pathname.startsWith('/api/')) {
       sendJson(response, 404, { error: 'This data endpoint does not exist.', code: 'not_found' });
       return;

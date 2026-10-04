@@ -1,6 +1,6 @@
 # Kaori IMD
 
-A pixel manga archive for real IMD transaction receipts on Ethereum. Built for David, with a new ink-blue, cherry-red and warm-ivory identity.
+A pixel manga archive for real IMD transaction receipts and spending approvals on Ethereum. Built for David, with a new ink-blue, cherry-red and warm-ivory identity.
 
 The receipt desk accepts an Ethereum transaction hash. It reads the original transaction, receipt and block, then decodes transfer events emitted by the official IMD contract. Recent transactions come from an actual bounded Ethereum block window. The website starts with an empty personal archive.
 
@@ -14,6 +14,14 @@ The receipt desk accepts an Ethereum transaction hash. It reads the original tra
 The archive holds up to 30 records. Browser storage is personal to that browser and device. Restoring a notes backup preserves hashes and notes; open each restored record to retrieve current Ethereum data. Imported files do not supply trusted blockchain readings. If browser storage is unavailable, the website keeps records for the current visit and displays an export reminder. Damaged existing browser data is preserved rather than overwritten.
 
 This is an independent IMD project. Kaori does not connect wallets or submit blockchain transactions. A exported record is a timestamped public RPC reading, not a signed certificate of ownership. Confirmations change after the recorded reading. Gas fee is the execution gas cost; possible blob gas fees are outside that field.
+
+## IMD Approval Check
+
+Open **Approval check**, enter your Ethereum wallet address and the application's spender address, then select **Check approval**. The tool reads the remaining official IMD spending allowance for that exact pair. Find the application's spender address in your wallet's approval details or the application's official documentation.
+
+The result distinguishes zero allowance, a finite spending limit and the maximum uint256 approval. Every amount preserves all 18 IMD decimals; the reading includes its block, retrieval time and Ethereum provider. Editing either address clears the previous result. Refresh reading requests another observation; the server can reuse the same pair's observation for up to 15 seconds.
+
+An allowance is permission, not a token balance or a verdict about an application's safety. The tool checks only the two addresses entered; it does not list all of a wallet's approvals. It does not connect a wallet, request a signature, change approvals or send transactions. Provider or verification failure stays unavailable rather than appearing as zero.
 
 ## Kaori contract
 

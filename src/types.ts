@@ -15,3 +15,9 @@ export type Recent = {
   transactions: { hash: string; blockNumber: string; transferCount: number }[];
 };
 export type ArchiveEntry = { hash: string; note: string; savedAt: string; receipt: Receipt | null };
+export type ApprovalReading = {
+  chainId: 1; contract: string; tokenSymbol: 'IMD'; decimals: 18;
+  owner: string; spender: string; allowanceRaw: string; allowance: string; unlimited: boolean;
+  snapshotBlockNumber: string; snapshotBlockHash: string; snapshotTimestamp: string;
+  retrievedAt: string; provider: string; source: string;
+};
