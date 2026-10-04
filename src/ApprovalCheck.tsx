@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ToolHeading from './ToolHeading';
 import { CONTRACT, displayAmount } from './domain.mjs';
 import { ADDRESS, ZERO_ADDRESS, parseApprovalReading } from './approval.mjs';
 import type { ApprovalReading } from './types';
@@ -44,7 +45,7 @@ export default function ApprovalCheck() {
 
   const state = reading ? reading.allowanceRaw === '0' ? 'none' : reading.unlimited ? 'maximum' : 'limited' : null;
   return <section className="approval-section" id="approvals" aria-labelledby="approval-heading"><div className="container">
-    <div className="section-head"><div><p className="eyebrow"><span className="section-index">02</span> THE APPROVAL DESK</p><h2 className="section-title" id="approval-heading">IMD Approval Check</h2></div><p className="section-copy">Check how much IMD a specific application address is allowed to spend from your wallet.</p></div>
+    <ToolHeading id="approval-heading" title="Approval check" subtitle="See how much IMD an application can spend from your wallet." bubble="Check the permission!" />
     <div className="approval-layout">
       <div className="approval-workspace">
         <form className="approval-form" onSubmit={event => { event.preventDefault(); void checkApproval(); }} noValidate aria-busy={busy}>

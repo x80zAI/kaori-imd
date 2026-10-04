@@ -1,47 +1,78 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import ReceiptInspector from './ReceiptInspector';
 import Archive from './Archive';
 import ApprovalCheck from './ApprovalCheck';
+import Dashboard from './Dashboard';
+import WorkspaceIcon from './WorkspaceIcon';
+import { DESKS, useWorkspaceNavigation, type WorkspaceView } from './workspace-navigation';
 import { useArchive } from './useArchive';
 import { KAORI_CONTRACT } from './domain.mjs';
+import './workspace.css';
+import './workspace-tools.css';
 
 const StakingDesk = lazy(() => import('./StakingDesk'));
 const NetworkDesk = lazy(() => import('./NetworkDesk'));
-
 const projectContract = KAORI_CONTRACT.trim();
 const contractReady = /^0x[0-9a-fA-F]{40}$/.test(projectContract);
-
+const MOTION_KEY = 'kaori-workspace-motion-v1';
+function useMotion() {
+  const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [enabled, setEnabled] = useState(() => { try { return localStorage.getItem(MOTION_KEY) !== 'off'; } catch { return true; } });
+  useEffect(() => {
+    const media = matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduced(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  function toggle() {
+    const next = !enabled; setEnabled(next);
+    try { localStorage.setItem(MOTION_KEY, next ? 'on' : 'off'); } catch { /* Applies for this visit when storage is unavailable. */ }
+  }
+  return { enabled: enabled && !reduced, reduced, toggle };
+}
+function AboutKaori() {
+  return <section className="workspace-about" id="story" aria-labelledby="about-heading">
+    <div className="about-copy"><h2 id="about-heading">The chain keeps the facts.<br /><span>Kaori keeps them readable.</span></h2><p>One place for your IMD receipts, spending permissions, official staking and public network activity.</p><p>Kaori is an independent IMD project. Readings show their source and retrieval time. Personal receipts and notes stay in your browser.</p><div className="about-links"><a href="https://imd.fun/token/" target="_blank" rel="noreferrer">IMD token source <WorkspaceIcon name="external" /></a><a href="https://imd.fun/docs/" target="_blank" rel="noreferrer">IMD network docs <WorkspaceIcon name="external" /></a></div></div>
+    <div className="about-art"><img src="/brand/kaori-scene.png" alt="Kaori in a pixel manga city, keeping a paper receipt" width="1536" height="1024" loading="lazy" /><span className="comic-bubble">Keep the thread.</span></div>
+    <div className="about-notes"><article><h3>Read the source.</h3><p>Ethereum receipts come from the chain. Public agent, job and oracle records come from the official IMD API.</p></article><article><h3>Keep your notes.</h3><p>Your archive and watchlist belong to this browser. Export the records you want to keep elsewhere.</p></article><article><h3>Stay in control.</h3><p>Staking uses your wallet and the official vault. Review each transaction in your wallet before confirming.</p></article></div>
+  </section>;
+}
 export default function App() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { active, visited, navigate, follow } = useWorkspaceNavigation();
+  const motion = useMotion();
   const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [requestedHash, setRequestedHash] = useState<{ hash: string; sequence: number } | null>(null);
   const archive = useArchive();
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) { if (event.key === 'Escape') setMenuOpen(false); }
-    window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey);
-  }, []);
-  function openRecord(hash: string) { setRequestedHash(previous => ({ hash, sequence: (previous?.sequence ?? 0) + 1 })); document.getElementById('receipt')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' }); }
+  const selected = DESKS.find(desk => desk.id === active);
+  useEffect(() => () => clearTimeout(copyTimer.current), []);
+  function openRecord(hash: string) { navigate('receipt'); setRequestedHash(previous => ({ hash, sequence: (previous?.sequence ?? 0) + 1 })); }
   async function copyContract() {
-    if (!contractReady) { setCopied(false); return; }
-    try { await navigator.clipboard.writeText(projectContract); setCopied(true); setTimeout(() => setCopied(false), 2000); }
-    catch { setCopied(false); }
+    if (!contractReady) return;
+    try { await navigator.clipboard.writeText(projectContract); setCopied(true); clearTimeout(copyTimer.current); copyTimer.current = setTimeout(() => setCopied(false), 2000); } catch { setCopied(false); }
   }
-  return <>
-    <a className="skip-link" href="#receipt">Skip to receipt desk</a>
-    <header className="site-header"><a href="#home" className="brand" aria-label="Kaori IMD home"><img className="brand-avatar" src="/brand/kaori-avatar.png" width="48" height="48" alt="" /><span className="brand-wordmark">KAORI <span>IMD</span></span></a><nav className="nav-links" aria-label="Main navigation"><a href="#receipt">Receipt desk</a><a href="#approvals">Approval check</a><a href="#staking">Staking</a><a href="#network">Network desk</a><a href="#archive">My archive</a><a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer" aria-label="Kaori IMD on X">X ↗</a></nav><a href="#receipt" className="button dark small header-cta">Read a receipt <span aria-hidden="true">↗</span></a><button className="menu-button" onClick={() => setMenuOpen(!menuOpen)} aria-expanded={menuOpen} aria-controls="mobile-nav" aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}>{menuOpen ? '×' : '☰'}</button>{menuOpen && <nav id="mobile-nav" className="mobile-menu" aria-label="Mobile navigation">{[['#receipt', 'Receipt desk'], ['#approvals', 'Approval check'], ['#staking', 'Staking'], ['#network', 'Network desk'], ['#story', 'The story'], ['#archive', 'My archive']].map(([href, label]) => <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label} ↗</a>)}<a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer" aria-label="Kaori IMD on X" onClick={() => setMenuOpen(false)}>X ↗</a></nav>}</header>
-    <main id="home"><section className="hero container" aria-labelledby="hero-heading"><div className="hero-copy"><p className="eyebrow"><span className="pixel-dot" /> AN IMD STORY, WRITTEN ON ETHEREUM</p><h1 className="hero-title" id="hero-heading">KAORI<br /><span>IMD<span className="seal" aria-hidden="true">記</span></span></h1><p className="hero-lead">Every transfer<br /><strong>has a story.</strong></p><p className="section-copy">Read your IMD receipts, check spending approvals, stake through the official vault, and follow the IMD network. Keep the records that matter.</p><div className="hero-actions"><a className="button primary" href="#receipt">Find your receipt <span aria-hidden="true">↗</span></a><a className="button secondary" href="#staking">Stake your IMD <span aria-hidden="true">↓</span></a></div><p className="input-help">REAL ETHEREUM RECORDS. YOUR OWN PAPER TRAIL.</p></div><div className="hero-art"><div className="art-topline"><span>KAORI'S ARCHIVE</span><span>CHAPTER 01 ↙</span></div><img className="scene-image" src="/brand/kaori-scene.png" alt="Pixel manga archivist Kaori holding a paper receipt in an ink-blue and cherry-red city alley" width="1536" height="1024" fetchPriority="high" /><div className="art-caption"><span>A small record.<br />A lasting memory.</span><span className="chapter-tag">ETHEREUM<br />MAINNET</span></div><div className="floating-receipt" aria-hidden="true"><span>▤</span><span>FROM THE CHAIN.<br />TO YOUR ARCHIVE.</span></div></div></section>
-      <div className="ticker" aria-label="IMD receipts, exact amounts, personal notes, Ethereum mainnet"><div className="ticker-track" aria-hidden="true">IMD RECEIPTS <span>✦</span> EXACT AMOUNTS <span>✦</span> PERSONAL NOTES <span>✦</span> ETHEREUM MAINNET <span>✦</span> IMD RECEIPTS <span>✦</span> EXACT AMOUNTS <span>✦</span> PERSONAL NOTES <span>✦</span></div></div>
-      <ReceiptInspector onSave={archive.save} noteFor={hash => archive.entries.find(entry => entry.hash === hash)?.note ?? ''} requestedHash={requestedHash} />
-      <ApprovalCheck />
-      <Suspense fallback={<section className="staking-section" id="staking"><div className="container"><p className="input-help" role="status">Loading the staking desk…</p></div></section>}><StakingDesk /></Suspense>
-      <Suspense fallback={<section className="network-section" id="network"><div className="container"><p className="input-help" role="status">Loading the network desk…</p></div></section>}><NetworkDesk /></Suspense>
-      <section className="story-section" id="story" aria-labelledby="story-heading"><div className="container"><div className="story-heading"><div><p className="eyebrow"><span className="section-index">05</span> MEET YOUR ARCHIVIST</p><h2 className="section-title" id="story-heading">The chain keeps the facts.<br /><span>Kaori keeps them readable.</span></h2></div><p className="section-copy">A pixel character with a practical job: help you follow the details of your IMD transfers without losing the thread.</p></div><div className="story-strip">{[
-        ['01', '↗', 'Follow the hash.', 'A transaction hash leads to the original Ethereum record. Kaori reads its receipt and checks for the official IMD transfer events.'],
-        ['02', '▤', 'Read every detail.', 'See exact IMD amounts, transfer addresses, block time and execution gas fee. Each reading shows when it was retrieved.'],
-        ['03', '＋', 'Keep your chapter.', 'Add a personal note, save the receipt in your browser, and export a readable record or a notes backup.']
-      ].map(([number, symbol, title, text]) => <article className="story-panel" key={number}><span className="story-number">{number}</span><span className="story-drawing" aria-hidden="true">{symbol}</span><div className="story-text"><h3>{title}</h3><p>{text}</p></div></article>)}</div></div></section>
-      <Archive entries={archive.entries} warning={archive.warning} onRemove={archive.remove} onOpen={openRecord} onRestore={archive.restore} />
-      <section className="source-strip"><div className="container"><div><p className="eyebrow">KAORI IMD CONTRACT</p><p className="source-contract" id="contract-status">{contractReady ? <a href={`https://etherscan.io/token/${projectContract}`} target="_blank" rel="noreferrer">{projectContract}</a> : <strong className="contract-pending">Coming Soon</strong>}</p></div><div className="receipt-actions"><button className="button secondary small contract-copy" onClick={() => void copyContract()} disabled={!contractReady} aria-describedby="contract-status">{copied ? 'Copied ✓' : 'Copy contract'}</button><a className="source-link" href="https://imd.fun/token/" target="_blank" rel="noreferrer">IMD data source ↗</a><a className="source-link" href="https://imd.fun/docs/" target="_blank" rel="noreferrer">IMD network docs ↗</a></div></div></section>
-    </main><footer className="site-footer"><div className="footer-brand"><img src="/brand/kaori-avatar.png" width="48" height="48" alt="" loading="lazy" /><div><span className="brand-wordmark">KAORI IMD</span><p>Every transfer has a story.</p></div></div><div className="footer-nav"><a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer">Follow on X ↗</a><a href="https://github.com/x80zAI/kaori-imd" target="_blank" rel="noreferrer">Source code ↗</a><a href="#home">Back to the first page ↑</a><span>Independent IMD project · Ethereum mainnet</span></div></footer>
-  </>;
+  function panel(id: WorkspaceView, content: ReactNode) {
+    return visited.has(id) ? <div className="workspace-panel" key={id} data-view={id} hidden={active !== id}>{content}</div> : null;
+  }
+  return <div className="kaori-workspace" data-motion={motion.enabled ? 'on' : 'off'}>
+    <a className="skip-link" href="#workspace-main" onClick={event => { event.preventDefault(); document.getElementById('workspace-title')?.focus(); }}>Skip to current tool</a>
+    <aside className="workspace-sidebar">
+      <a className="workspace-brand" href="#home" onClick={event => follow(event, 'home')} aria-label="Kaori IMD dashboard"><span className="workspace-avatar"><img src="/brand/kaori-avatar.png" alt="" width="88" height="88" /></span><span><strong>KAORI <span>IMD</span></strong><small>READ / TRACK / OWN</small></span></a>
+      <nav className="workspace-nav" aria-label="Workspace navigation">{DESKS.map(desk => <a key={desk.id} href={`#${desk.id}`} onClick={event => follow(event, desk.id)} aria-current={active === desk.id ? 'page' : undefined}><WorkspaceIcon name={desk.icon} /><span>{desk.navLabel}</span><span className="nav-active-mark" aria-hidden="true" /></a>)}</nav>
+      <div className="workspace-sidebar-bottom"><a href="#story" onClick={event => follow(event, 'story')} aria-current={active === 'story' ? 'page' : undefined}><WorkspaceIcon name="info" />About Kaori</a><a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer"><WorkspaceIcon name="x" />Follow on X<WorkspaceIcon name="external" /></a><a href="https://github.com/x80zAI/kaori-imd" target="_blank" rel="noreferrer"><WorkspaceIcon name="code" />Source code<WorkspaceIcon name="external" /></a><p>KEEP THE CHAIN HUMAN.</p></div>
+    </aside>
+    <div className="workspace-body">
+      <header className="workspace-topbar"><div className="workspace-current"><WorkspaceIcon name={selected?.icon ?? 'info'} /><h1 id="workspace-title" tabIndex={-1}>{selected?.title ?? 'About Kaori'}</h1></div><div className="workspace-controls"><span className="workspace-chain"><WorkspaceIcon name="ethereum" /><span>Ethereum <span className="chain-mainnet">mainnet</span></span></span><button className="motion-toggle" type="button" aria-label={motion.reduced ? 'Animations disabled by your device preference' : motion.enabled ? 'Pause animations' : 'Enable animations'} aria-pressed={motion.enabled} disabled={motion.reduced} onClick={motion.toggle} title={motion.reduced ? 'Your device requests reduced motion.' : undefined}><span>Motion {motion.enabled ? 'on' : 'off'}</span><span className="motion-switch" aria-hidden="true" /></button></div></header>
+      <main className="workspace-content" id="workspace-main">
+        {panel('home', <Dashboard active={active === 'home'} motionEnabled={motion.enabled} reducedMotion={motion.reduced} onToggleMotion={motion.toggle} follow={follow} archiveCount={archive.entries.length} />)}
+        {panel('receipt', <ReceiptInspector onSave={archive.save} noteFor={hash => archive.entries.find(entry => entry.hash === hash)?.note ?? ''} requestedHash={requestedHash} />)}
+        {panel('approvals', <ApprovalCheck />)}
+        {panel('staking', <Suspense fallback={<div className="workspace-loading" role="status">Loading the staking desk…</div>}><StakingDesk /></Suspense>)}
+        {panel('network', <Suspense fallback={<div className="workspace-loading" role="status">Loading the network desk…</div>}><NetworkDesk /></Suspense>)}
+        {panel('archive', <Archive entries={archive.entries} warning={archive.warning} onRemove={archive.remove} onOpen={openRecord} onRestore={archive.restore} />)}
+        {panel('story', <AboutKaori />)}
+      </main>
+      <footer className="workspace-footer"><span className="workspace-independent"><span className="footer-pixel-flower" aria-hidden="true">✦</span>Independent IMD project</span><a className="mobile-about-link" href="#story" onClick={event => follow(event, 'story')}>About Kaori</a><a className="mobile-x-link" href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer">X <WorkspaceIcon name="external" /></a><div className="workspace-contract"><span id="contract-status">Kaori contract: {contractReady ? <a href={`https://etherscan.io/token/${projectContract}`} target="_blank" rel="noreferrer">{projectContract}</a> : <strong>Coming Soon</strong>}</span><button onClick={() => void copyContract()} disabled={!contractReady} aria-label={copied ? 'Contract copied' : 'Copy Kaori contract'} aria-describedby="contract-status" title={contractReady ? 'Copy contract address' : 'The contract address has not been announced.'}><WorkspaceIcon name={copied ? 'check' : 'copy'} /></button></div></footer>
+    </div>
+  </div>;
 }
