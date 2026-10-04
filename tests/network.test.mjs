@@ -84,6 +84,26 @@ test('oracle false and zero answers are kept, absence remains unavailable, no si
   assert.throws(() => read({ ...base, computed: { answer: Number.MAX_SAFE_INTEGER + 1 } }), isUnavailable);
 });
 
+test('oracle ABI array answer types remain readable in list and detail responses', () => {
+  for (const answerType of ['bool', 'address', 'bytes32', 'uint256', 'address[]', 'bytes32[]']) {
+    const raw = oracle({ answerType });
+    const list = normalizeNetworkData(request('view=oracles'), { count: 1, requests: [raw] });
+    assert.equal(list.items[0].answerType, answerType);
+    assert.equal(normalizeNetworkData(request(`view=oracle&id=${ID}`), raw).answerType, answerType);
+  }
+  const answer = ['0x' + 'a'.repeat(64), '0x' + 'b'.repeat(64)];
+  const detail = normalizeNetworkData(request(`view=oracle&id=${ID}`), oracle({ answerType: 'bytes32[]', computed: { answer } }));
+  assert.deepEqual(JSON.parse(detail.resultText), answer);
+  assert.equal(detail.resultSource, 'computed');
+});
+
+test('oracle answer types reject unsupported shapes without relaxing status validation', () => {
+  for (const answerType of [undefined, null, {}, ['bool'], '', 'BOOL', 'uint256[]', 'bytes32[2]', 'bytes32[][]', 'bytes32[] ', '<script>', 'x'.repeat(61)]) {
+    assert.throws(() => normalizeNetworkData(request('view=oracles'), { count: 1, requests: [oracle({ answerType })] }), isUnavailable);
+  }
+  assert.throws(() => normalizeNetworkData(request('view=oracles'), { count: 1, requests: [oracle({ status: 'attested[]' })] }), isUnavailable);
+});
+
 test('upstream receives one fixed-origin GET with encoded search and bounded page size', async () => {
   let seen;
   const service = createNetworkService({ fetchImpl: async (url, options) => { seen = { url, options }; return response({ count: 0, jobs: [] }); } });
