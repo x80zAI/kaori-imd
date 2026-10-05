@@ -417,10 +417,19 @@ test('production static serving protects dotfiles, traversal and symlinks outsid
     await mkdir(outside);
     await writeFile(join(dist, 'index.html'), '<main>Kaori</main>');
     await writeFile(join(dist, 'style.css'), 'body{}');
+    await mkdir(join(dist, 'research'));
+    await writeFile(join(dist, 'research', 'kaori.html'), '<article>Kaori research</article>');
+    await writeFile(join(dist, 'research', 'Kaori-IMD-Research.pdf'), '%PDF-1.7');
     await writeFile(join(outside, 'private.txt'), 'Private file');
     assert.equal((await resolveStaticFile(dist, '/', 'text/html')).type, 'text/html; charset=utf-8');
     assert.equal((await resolveStaticFile(dist, '/saved-receipts', 'text/html')).path, join(dist, 'index.html'));
     assert.equal((await resolveStaticFile(dist, '/style.css')).type, 'text/css; charset=utf-8');
+    for (const articleUrl of ['/research/kaori', '/research/kaori/', '/research/kaori?source=x']) {
+      const article = await resolveStaticFile(dist, articleUrl, 'text/html');
+      assert.equal(article.path, join(dist, 'research', 'kaori.html'));
+      assert.equal(article.type, 'text/html; charset=utf-8');
+    }
+    assert.equal((await resolveStaticFile(dist, '/research/Kaori-IMD-Research.pdf')).type, 'application/pdf');
     await assert.rejects(resolveStaticFile(dist, '/.env', 'text/html'), (error) => error.status === 404);
     await assert.rejects(resolveStaticFile(dist, '/%2e%2e/outside/private.txt'), (error) => error.status === 400);
     assert.equal(isWithinDirectory(dist, resolve(dist, '..', 'other')), false);
