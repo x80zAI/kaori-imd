@@ -8,7 +8,7 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff': 'font/woff', '.woff2': 'font/woff2',
-  '.txt': 'text/plain; charset=utf-8', '.mp4': 'video/mp4',
+  '.txt': 'text/plain; charset=utf-8', '.mp4': 'video/mp4', '.pdf': 'application/pdf',
 };
 
 export function isWithinDirectory(directory, candidate) {
@@ -20,7 +20,8 @@ export async function resolveStaticFile(distDirectory, rawUrl, accept = '') {
   const { pathname } = parseRequestUrl(rawUrl);
   if (pathname.split('/').some((part) => part.startsWith('.'))) throw new PublicError('This file is unavailable.', 404, 'not_found');
   const dist = await realpath(distDirectory);
-  const requested = resolve(dist, `.${pathname === '/' ? '/index.html' : pathname}`);
+  const servedPath = pathname === '/research/kaori' || pathname === '/research/kaori/' ? '/research/kaori.html' : pathname;
+  const requested = resolve(dist, `.${servedPath === '/' ? '/index.html' : servedPath}`);
   if (!isWithinDirectory(dist, requested)) throw new PublicError('This request path is invalid.', 400, 'invalid');
   let candidate = requested;
   try {
