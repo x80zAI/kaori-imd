@@ -40,5 +40,10 @@ export default function Dashboard({ active, follow, archiveCount }: { active: bo
       <div className="comic-petals" aria-hidden="true"><i /><i /><i /></div>
     </div>
     <nav className="dashboard-tools" aria-label={t('Choose a utility', '选择工具')}>{DESKS.filter(desk => desk.id !== 'home').map(desk => <a key={desk.id} className="dashboard-tool" href={`#${desk.id}`} onClick={event => follow(event, desk.id)}><span className="dashboard-tool-icon"><WorkspaceIcon name={desk.icon} /></span><h3>{t(desk.title, CHINESE_DESKS[desk.id as keyof typeof CHINESE_DESKS].title)}</h3><p>{desk.id === 'archive' && archiveCount > 0 ? t(`${archiveCount} saved ${archiveCount === 1 ? 'receipt' : 'receipts'} in this browser. Reopen your records and notes.`, `当前浏览器已保存 ${archiveCount} 份交易凭证。重新查看你的记录和笔记。`) : t(desk.description, CHINESE_DESKS[desk.id as keyof typeof CHINESE_DESKS].description)}</p><WorkspaceIcon name="arrow" /></a>)}</nav>
+    <section className="dashboard-research" aria-labelledby="research-heading">
+      <span className="research-stamp">{t('RESEARCH / 001', '研究 / 001')}</span>
+      <div><h3 id="research-heading">{t('The ideas behind Kaori.', 'Kaori 背后的理念。')}</h3><p>{t('Our utilities, the problems they address, and the funding model proposed for Kaori Fuel. Read the complete technical research article.', '了解我们的工具、它们解决的问题，以及 Kaori Fuel 提出的资金模型。阅读完整的技术研究文章。')}</p></div>
+      <a className="workspace-action secondary" href="/research/kaori">{t('Read the paper', '阅读文章')}<WorkspaceIcon name="arrow" /></a>
+    </section>
   </section>;
 }
