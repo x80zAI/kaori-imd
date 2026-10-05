@@ -28,6 +28,7 @@ const server = createServer(async (request, response) => {
       return;
     }
     if (production) return await staticHandler(request, response);
+    if (pathname === '/research/kaori' || pathname === '/research/kaori/') request.url = '/research/kaori.html';
     if (!['GET', 'HEAD'].includes(request.method)) {
       sendJson(response, 405, { error: 'Use GET or HEAD to open this page.' }, { Allow: 'GET, HEAD' });
       return;

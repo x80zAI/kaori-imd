@@ -19,18 +19,14 @@ const contractReady = /^0x[0-9a-fA-F]{40}$/.test(projectContract);
 const MOTION_KEY = 'kaori-workspace-motion-v1';
 function useMotion() {
   const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
-  const [enabled, setEnabled] = useState(() => { try { return localStorage.getItem(MOTION_KEY) !== 'off'; } catch { return true; } });
+  const [enabled] = useState(() => { try { return localStorage.getItem(MOTION_KEY) !== 'off'; } catch { return true; } });
   useEffect(() => {
     const media = matchMedia('(prefers-reduced-motion: reduce)');
     const update = () => setReduced(media.matches);
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
-  function toggle() {
-    const next = !enabled; setEnabled(next);
-    try { localStorage.setItem(MOTION_KEY, next ? 'on' : 'off'); } catch { /* Applies for this visit when storage is unavailable. */ }
-  }
-  return { enabled: enabled && !reduced, reduced, toggle };
+  return { enabled: enabled && !reduced };
 }
 function AboutKaori() {
   const { t } = useLanguage();
@@ -63,10 +59,21 @@ export default function App() {
     <aside className="workspace-sidebar">
       <a className="workspace-brand" href="#home" onClick={event => follow(event, 'home')} aria-label={t('Kaori IMD dashboard', 'Kaori IMD 仪表盘')}><span className="workspace-avatar"><img src="/brand/kaori-avatar.png" alt="" width="88" height="88" /></span><span><strong>KAORI <span>IMD</span></strong><small>{t('READ / TRACK / OWN', '读取 / 追踪 / 掌控')}</small></span></a>
       <nav className="workspace-nav" aria-label={t('Workspace navigation', '工作台导航')}>{DESKS.map(desk => <a key={desk.id} href={`#${desk.id}`} onClick={event => follow(event, desk.id)} aria-current={active === desk.id ? 'page' : undefined}><WorkspaceIcon name={desk.icon} /><span>{t(desk.navLabel, CHINESE_DESKS[desk.id as keyof typeof CHINESE_DESKS].navLabel)}</span><span className="nav-active-mark" aria-hidden="true" /></a>)}</nav>
-      <div className="workspace-sidebar-bottom"><a href="#story" onClick={event => follow(event, 'story')} aria-current={active === 'story' ? 'page' : undefined}><WorkspaceIcon name="info" />{t('About Kaori', '关于 Kaori')}</a><a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer"><WorkspaceIcon name="x" />{t('Follow on X', '关注 X')}<WorkspaceIcon name="external" /></a><a href="https://github.com/x80zAI/kaori-imd" target="_blank" rel="noreferrer"><WorkspaceIcon name="code" />{t('Source code', '源代码')}<WorkspaceIcon name="external" /></a><p>{t('KEEP THE CHAIN HUMAN.', '让链上记录更有温度。')}</p></div>
+      <div className="workspace-sidebar-bottom"><a href="#story" onClick={event => follow(event, 'story')} aria-current={active === 'story' ? 'page' : undefined}><WorkspaceIcon name="info" />{t('About Kaori', '关于 Kaori')}</a><a href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer"><WorkspaceIcon name="x" />{t('Follow on X', '关注 X')}<WorkspaceIcon name="external" /></a><a href="/research/Kaori-IMD-Research.pdf" target="_blank" rel="noopener noreferrer"><WorkspaceIcon name="receipt" />{t('Research PDF', '研究 PDF')}<WorkspaceIcon name="external" /></a><p>{t('KEEP THE CHAIN HUMAN.', '让链上记录更有温度。')}</p></div>
     </aside>
     <div className="workspace-body">
-      <header className="workspace-topbar"><div className="workspace-current"><WorkspaceIcon name={selected?.icon ?? 'info'} /><h1 id="workspace-title" tabIndex={-1}>{selected ? t(selected.title, CHINESE_DESKS[selected.id as keyof typeof CHINESE_DESKS].title) : t('About Kaori', '关于 Kaori')}</h1></div><div className="workspace-controls"><span className="workspace-chain"><WorkspaceIcon name="ethereum" /><span>{t('Ethereum', '以太坊')} <span className="chain-mainnet">{t('mainnet', '主网')}</span></span></span><div className="language-switch" role="group" aria-label={t('Language', '语言')}><button type="button" lang="en" aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button><button type="button" lang="zh-CN" aria-pressed={language === 'zh'} onClick={() => setLanguage('zh')}>中文</button></div><button className="motion-toggle" type="button" aria-label={motion.reduced ? t('Decorative effects disabled by your device preference', '装饰动效已根据设备偏好关闭') : motion.enabled ? t('Disable decorative effects', '关闭装饰动效') : t('Enable decorative effects', '开启动效')} aria-pressed={motion.enabled} disabled={motion.reduced} onClick={motion.toggle} title={motion.reduced ? t('Your device requests reduced motion.', '你的设备已设置减少动态效果。') : undefined}><span>{t('Effects', '动效')} {motion.enabled ? t('on', '开') : t('off', '关')}</span><span className="motion-switch" aria-hidden="true" /></button></div></header>
+      <header className="workspace-topbar">
+        <div className="workspace-current"><WorkspaceIcon name={selected?.icon ?? 'info'} /><h1 id="workspace-title" tabIndex={-1}>{selected ? t(selected.title, CHINESE_DESKS[selected.id as keyof typeof CHINESE_DESKS].title) : t('About Kaori', '关于 Kaori')}</h1></div>
+        <div className="workspace-controls">
+          <span className="workspace-chain"><WorkspaceIcon name="ethereum" /><span>{t('Ethereum', '以太坊')} <span className="chain-mainnet">{t('mainnet', '主网')}</span></span></span>
+          <div className="language-switch" role="group" aria-label={t('Language', '语言')}><button type="button" lang="en" aria-pressed={language === 'en'} onClick={() => setLanguage('en')}>English</button><button type="button" lang="zh-CN" aria-pressed={language === 'zh'} onClick={() => setLanguage('zh')}>中文</button></div>
+          <div className="header-contract">
+            <span className="header-contract-label">{t('Kaori CA', 'Kaori 合约')}</span>
+            <span id="header-contract-status">{contractReady ? <a href={`https://etherscan.io/token/${projectContract}`} target="_blank" rel="noreferrer" title={projectContract}>{projectContract.slice(0, 6)}…{projectContract.slice(-4)}</a> : <strong>{t('Coming Soon', '即将公布')}</strong>}</span>
+            <button type="button" onClick={() => void copyContract()} disabled={!contractReady} aria-label={copied ? t('Contract copied', '合约已复制') : t('Copy Kaori contract', '复制 Kaori 合约')} aria-describedby="header-contract-status" title={contractReady ? t('Copy contract address', '复制合约地址') : t('The contract address has not been announced.', '合约地址尚未公布。')}><WorkspaceIcon name={copied ? 'check' : 'copy'} /></button>
+          </div>
+        </div>
+      </header>
       <main className="workspace-content" id="workspace-main">
         {panel('home', <Dashboard active={active === 'home'} follow={follow} archiveCount={archive.entries.length} />)}
         {panel('receipt', <ReceiptInspector onSave={archive.save} noteFor={hash => archive.entries.find(entry => entry.hash === hash)?.note ?? ''} requestedHash={requestedHash} />)}
@@ -76,7 +83,7 @@ export default function App() {
         {panel('archive', <Archive entries={archive.entries} warning={archive.warning} onRemove={archive.remove} onOpen={openRecord} onRestore={archive.restore} />)}
         {panel('story', <AboutKaori />)}
       </main>
-      <footer className="workspace-footer"><span className="workspace-independent"><span className="footer-pixel-flower" aria-hidden="true">✦</span>{t('Independent IMD project', '独立 IMD 项目')}</span><a className="mobile-about-link" href="#story" onClick={event => follow(event, 'story')}>{t('About Kaori', '关于 Kaori')}</a><a className="mobile-x-link" href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer">X <WorkspaceIcon name="external" /></a><div className="workspace-contract"><span id="contract-status">{t('Kaori contract: ', 'Kaori 合约：')}{contractReady ? <a href={`https://etherscan.io/token/${projectContract}`} target="_blank" rel="noreferrer">{projectContract}</a> : <strong>{t('Coming Soon', '即将公布')}</strong>}</span><button onClick={() => void copyContract()} disabled={!contractReady} aria-label={copied ? t('Contract copied', '合约已复制') : t('Copy Kaori contract', '复制 Kaori 合约')} aria-describedby="contract-status" title={contractReady ? t('Copy contract address', '复制合约地址') : t('The contract address has not been announced.', '合约地址尚未公布。')}><WorkspaceIcon name={copied ? 'check' : 'copy'} /></button></div></footer>
+      <footer className="workspace-footer"><span className="workspace-independent"><span className="footer-pixel-flower" aria-hidden="true">✦</span>{t('Independent IMD project', '独立 IMD 项目')}</span><a className="footer-research-link" href="/research/kaori">{t('Research paper', '研究文章')} <WorkspaceIcon name="arrow" /></a><a className="mobile-about-link" href="#story" onClick={event => follow(event, 'story')}>{t('About Kaori', '关于 Kaori')}</a><a className="mobile-x-link" href="https://x.com/KaoriIMD" target="_blank" rel="noopener noreferrer">X <WorkspaceIcon name="external" /></a><div className="workspace-contract"><span id="contract-status">{t('Kaori contract: ', 'Kaori 合约：')}{contractReady ? <a href={`https://etherscan.io/token/${projectContract}`} target="_blank" rel="noreferrer">{projectContract}</a> : <strong>{t('Coming Soon', '即将公布')}</strong>}</span><button onClick={() => void copyContract()} disabled={!contractReady} aria-label={copied ? t('Contract copied', '合约已复制') : t('Copy Kaori contract', '复制 Kaori 合约')} aria-describedby="contract-status" title={contractReady ? t('Copy contract address', '复制合约地址') : t('The contract address has not been announced.', '合约地址尚未公布。')}><WorkspaceIcon name={copied ? 'check' : 'copy'} /></button></div></footer>
     </div>
   </div>;
 }

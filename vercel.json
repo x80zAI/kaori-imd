@@ -5,6 +5,8 @@
   "outputDirectory": "dist",
   "functions": { "api/*.js": { "maxDuration": 30 } },
   "rewrites": [
+    { "source": "/research/kaori", "destination": "/research/kaori.html" },
+    { "source": "/research/kaori/", "destination": "/research/kaori.html" },
     { "source": "/api/receipt", "destination": "/api/receipt" },
     { "source": "/api/recent", "destination": "/api/recent" },
     { "source": "/api/allowance", "destination": "/api/allowance" },

@@ -8,7 +8,7 @@ The receipt desk accepts an Ethereum transaction hash. It reads the original tra
 
 Choose a tool from the workspace navigation. Each utility has its own screen; changing tools keeps in-progress form values, notes and the staking session intact. Existing receipt links and browser back/forward navigation remain available.
 
-The dashboard plays the full Kaori comic film without an audio track, alongside **Every transfer has a story** and its two tool shortcuts. Playback pauses when leaving the dashboard or hiding the tab. Motion controls and the device's reduced-motion preference stop automatic animation; native video controls remain available for manual playback.
+The dashboard plays the full Kaori comic film muted and looping, alongside **Every transfer has a story** and its two tool shortcuts. There are no pause or native video controls. The header offers English and Simplified Chinese plus Kaori's contract status and copy button. Decorative motion still respects the device's reduced-motion preference.
 
 1. Paste a transaction hash or choose a recent IMD transaction.
 2. Read its exact IMD transfer amounts, addresses, block time, confirmations, finality and execution gas fee.
@@ -58,6 +58,14 @@ The network desk does not submit paid requests or spend from a project wallet. S
 Kaori's own contract address is not configured. The website displays **Coming Soon**, and copying the contract is disabled while the address is empty. David will supply the address; set the single `KAORI_CONTRACT` value in `src/domain.mjs` when it is available. A valid Ethereum address will then appear with its matching copy button and Etherscan link.
 
 The official IMD token and sIMD staking vault are external contracts, separate from Kaori's future contract. Keeping Kaori's contract empty does not replace or invent either official contract.
+
+## Research article and PDF
+
+The lower dashboard research section and footer open the complete English article at https://kaorimd.site/research/kaori. It covers the available utilities, their data boundaries and the proposed Kaori Fuel funding model. Fuel's contract, verifier and automatic payouts are not deployed. The article does not claim peer review, an independent audit or measured reimbursement results.
+
+The sidebar's **Research PDF** link replaces the source-code shortcut and opens `/research/Kaori-IMD-Research.pdf`. The article also provides a PDF download link. Its static HTML includes its own canonical URL and X sharing metadata, with no separate domain needed.
+
+Edit `docs/kaori-research-article.md` and run `node scripts/build-research.mjs` to regenerate the committed HTML and policy text before building. Regenerate the PDF whenever its article content changes. These checked-in public files are served directly in production.
 
 ## Public links
 
